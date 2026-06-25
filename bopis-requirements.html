@@ -1,0 +1,2553 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unified Commerce — Nike AR | Requerimiento Técnico</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── VARIABLES ─────────────────────────────────────────── */
+    :root {
+      /* Infracommerce brand */
+      --infra-dark:   #3f3354;
+      --infra-purple: #786efe;
+      --infra-blue:   #59bff2;
+      --infra-green:  #56c979;
+      --infra-pink:   #ef426f;
+      --infra-amber:  #f29d6d;
+
+      /* Nike demo — constant, never themed */
+      --black:   #111111;
+      --white:   #ffffff;
+      --orange:  #fa5400;
+      --gray-50: #f7f7f7;
+      --gray-100:#f0f0f0;
+      --gray-200:#e5e5e5;
+      --gray-400:#aaaaaa;
+      --gray-600:#666666;
+
+      /* Document chrome — light mode */
+      --doc-bg:      #f5f4f8;
+      --doc-surface: #ffffff;
+      --doc-border:  #e0ddf0;
+      --doc-text:    #3f3354;
+      --doc-muted:   #6b6290;
+      --doc-subtle:  #9b96bb;
+      --doc-hover:   #f0eef8;
+
+      /* Status colors */
+      --green-bg:#e6f4ea;
+      --green-tx:#1a7a34;
+      --amber-bg:#fff8e1;
+      --amber-tx:#b45309;
+      --red-bg:  #ffe8e0;
+      --red-tx:  #c0392b;
+      --blue-bg: #e8f0fe;
+      --blue-tx: #1a56db;
+    }
+
+    body.dark {
+      --doc-bg:      #0f0c1a;
+      --doc-surface: #1c1630;
+      --doc-border:  #352a4f;
+      --doc-text:    #e8e4f2;
+      --doc-muted:   #b4aed4;
+      --doc-subtle:  #7b74a0;
+      --doc-hover:   #251e3a;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      background: var(--doc-bg);
+      color: var(--doc-text);
+      font-size: 15px;
+      line-height: 1.5;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* ── TOP BAR ─────────────────────────────────────────── */
+    .topbar {
+      background: var(--infra-dark);
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+    }
+    .topbar-left  { display: flex; align-items: center; gap: 14px; }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+
+    /* Infracommerce logo */
+    .infra-logo { display: flex; align-items: center; gap: 8px; }
+    .infra-logo-icon {
+      width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+      background: conic-gradient(#ef426f 0% 20%, #f29d6d 20% 35%, #56c979 35% 55%, #59bff2 55% 75%, #786efe 75% 100%);
+    }
+    .infra-logo-text {
+      font-size: 13px; font-weight: 400;
+      color: rgba(255,255,255,0.7); letter-spacing: 0.2px; white-space: nowrap;
+    }
+    .infra-logo-text strong { font-weight: 800; color: #ffffff; }
+
+    .topbar-divider { color: rgba(255,255,255,0.2); font-size: 16px; }
+    .topbar-client  { font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.55); letter-spacing: 0.5px; }
+    .topbar-title   { color: rgba(255,255,255,0.4); font-size: 13px; font-weight: 500; }
+    .topbar-badge   {
+      background: var(--infra-purple); color: #ffffff;
+      font-size: 10px; font-weight: 800; padding: 2px 8px;
+      border-radius: 2px; letter-spacing: 1px; text-transform: uppercase;
+    }
+
+    /* Dark mode toggle */
+    .darkmode-btn {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(255,255,255,0.1); border: none; cursor: pointer;
+      font-size: 15px; color: #ffffff;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s; flex-shrink: 0;
+    }
+    .darkmode-btn:hover { background: rgba(255,255,255,0.22); }
+
+    /* Rainbow bar */
+    .rainbow-bar {
+      height: 4px;
+      background: linear-gradient(to right, #ef426f 0%, #f29d6d 20%, #56c979 40%, #59bff2 60%, #786efe 80%, #ef426f 100%);
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 999;
+      pointer-events: none;
+    }
+
+    /* ── JOURNEY NAV ─────────────────────────────────────── */
+    .journey-bar {
+      background: var(--doc-surface);
+      border-bottom: 1px solid var(--doc-border);
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      overflow-x: auto;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .journey-step {
+      display: flex; align-items: center; gap: 10px;
+      padding: 16px 28px 14px;
+      font-size: 12px; font-weight: 700; letter-spacing: 0.8px;
+      text-transform: uppercase; cursor: pointer;
+      border-bottom: 3px solid transparent; transition: all 0.15s;
+      color: var(--doc-subtle); white-space: nowrap; user-select: none;
+    }
+    .journey-step:hover:not(.active) { color: var(--doc-muted); background: var(--doc-hover); }
+    .journey-step.active { color: var(--infra-purple); border-bottom-color: var(--infra-purple); }
+    .step-pill {
+      width: 22px; height: 22px; border-radius: 50%;
+      font-size: 11px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--doc-border); color: var(--doc-muted);
+      transition: all 0.15s; flex-shrink: 0;
+    }
+    .journey-step.active .step-pill { background: var(--infra-purple); color: #ffffff; }
+    .journey-arrow { color: var(--doc-border); font-size: 16px; padding: 0 4px; pointer-events: none; }
+
+    /* ── PAGE SECTIONS ───────────────────────────────────── */
+    .page-section { display: none; }
+    .page-section.active { display: block; }
+    .main { max-width: 1080px; margin: 0 auto; padding: 40px 24px 80px; }
+
+    /* ── OBJECTIVE CARD ──────────────────────────────────── */
+    .objective-card {
+      background: var(--infra-dark); color: #ffffff;
+      border-radius: 10px; padding: 36px 44px; margin-bottom: 36px;
+      position: relative; overflow: hidden;
+    }
+    .objective-card::after {
+      content: ''; position: absolute; right: -40px; top: -40px;
+      width: 200px; height: 200px; border-radius: 50%;
+      background: rgba(255,255,255,0.03);
+    }
+    .objective-tag  { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: var(--infra-amber); margin-bottom: 10px; }
+    .objective-title { font-size: 20px; font-weight: 800; line-height: 1.3; margin-bottom: 12px; }
+    .objective-desc  { font-size: 14px; color: rgba(255,255,255,0.6); line-height: 1.65; max-width: 680px; }
+    .objective-meta  { display: flex; gap: 24px; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap; }
+    .meta-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.35); margin-bottom: 2px; }
+    .meta-value { font-size: 13px; color: rgba(255,255,255,0.7); font-weight: 500; }
+
+    /* ── TABS ────────────────────────────────────────────── */
+    .tabs-nav { display: flex; border-bottom: 2px solid var(--doc-border); margin-bottom: 28px; gap: 0; }
+    .tab-btn {
+      padding: 11px 22px; font-size: 13px; font-weight: 700; color: var(--doc-subtle);
+      cursor: pointer; border: none; background: none;
+      border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.15s;
+    }
+    .tab-btn:hover:not(.active) { color: var(--doc-muted); }
+    .tab-btn.active { color: var(--infra-purple); border-bottom-color: var(--infra-purple); }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    /* ── SECTION INTRO ───────────────────────────────────── */
+    .section-intro { font-size: 14px; color: var(--doc-muted); margin-bottom: 20px; line-height: 1.6; }
+
+    /* ══════════════════════════════════════════════════════
+       DEMO VISUAL
+    ══════════════════════════════════════════════════════ */
+
+    .demo-container { max-width: 960px; margin: 0 auto; }
+    .demo-legend {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px; gap: 16px; flex-wrap: wrap;
+    }
+    .demo-legend-text { font-size: 13px; color: var(--doc-muted); }
+    .demo-controls { display: flex; align-items: center; gap: 10px; }
+    .demo-reset-btn {
+      font-size: 12px; font-weight: 700; color: var(--doc-muted);
+      background: var(--doc-surface); border: 1px solid var(--doc-border);
+      padding: 6px 14px; border-radius: 4px; cursor: pointer; transition: all 0.15s;
+    }
+    .demo-reset-btn:hover { background: var(--doc-hover); color: var(--doc-text); }
+    .demo-state-badge {
+      font-size: 11px; font-weight: 800; padding: 5px 12px; border-radius: 99px;
+      text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.3s;
+    }
+    .state-default  { background: var(--doc-hover); color: var(--doc-muted); }
+    .state-filtered { background: #e6f4ea; color: var(--green-tx); }
+
+    /* Browser frame — always light (simulates real website) */
+    .browser-frame {
+      background: var(--white);
+      border-radius: 10px;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.12), 0 1px 4px rgba(0,0,0,0.08);
+      overflow: hidden;
+      border: 1px solid var(--gray-200);
+    }
+    .browser-bar {
+      background: #f0f0f0;
+      padding: 10px 14px;
+      display: flex; align-items: center; gap: 12px;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    .browser-dots { display: flex; gap: 6px; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; }
+    .dot-y { background: #febc2e; }
+    .dot-g { background: #28c840; }
+    .browser-url-bar {
+      flex: 1; background: var(--white); border: 1px solid var(--gray-200);
+      border-radius: 6px; padding: 4px 12px; font-size: 12px; color: var(--gray-600);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .url-lock { font-size: 10px; color: #888; }
+
+    /* Nike mini header */
+    .nike-header {
+      background: var(--white); border-bottom: 1px solid var(--gray-100);
+      padding: 0 24px; display: flex; align-items: center;
+      justify-content: space-between; height: 44px;
+    }
+    .nike-logo { font-family: 'Bebas Neue', Impact, 'Arial Black', sans-serif; font-size: 24px; letter-spacing: 3px; color: var(--black); }
+    .nike-nav { display: flex; gap: 16px; }
+    .nike-nav span { font-size: 12px; font-weight: 600; color: var(--black); cursor: pointer; }
+    .nike-actions { display: flex; gap: 12px; font-size: 14px; color: var(--black); cursor: pointer; }
+
+    /* PLP layout */
+    .plp-layout { display: grid; grid-template-columns: 200px 1fr; min-height: 500px; }
+
+    /* Sidebar */
+    .plp-sidebar { padding: 20px 16px; border-right: 1px solid var(--gray-100); }
+    .pickup-section { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--gray-100); }
+    .pickup-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+    .pickup-label { font-size: 13px; font-weight: 700; color: var(--black); }
+    .toggle-track {
+      width: 40px; height: 22px; border-radius: 11px; background: var(--gray-200);
+      position: relative; cursor: pointer; transition: background 0.25s ease; flex-shrink: 0;
+    }
+    .toggle-track.on { background: var(--black); }
+    .toggle-thumb {
+      position: absolute; top: 3px; left: 3px;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--white); box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+      transition: transform 0.25s ease;
+    }
+    .toggle-track.on .toggle-thumb { transform: translateX(18px); }
+    .store-selected-row { display: none; align-items: center; justify-content: space-between; margin-top: 8px; }
+    .store-selected-row.visible { display: flex; }
+    .store-selected-name { font-size: 12px; font-weight: 700; color: var(--black); }
+    .store-change-link {
+      font-size: 11px; font-weight: 700; color: var(--gray-600);
+      text-decoration: underline; cursor: pointer; border: none; background: none;
+    }
+    .store-change-link:hover { color: var(--black); }
+    .filter-group { margin-bottom: 14px; }
+    .filter-group-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 0; cursor: pointer; border-bottom: 1px solid var(--gray-100);
+    }
+    .filter-group-name { font-size: 12px; font-weight: 700; color: var(--black); }
+    .filter-chevron { font-size: 10px; color: var(--gray-400); }
+
+    /* PLP main content */
+    .plp-content { padding: 20px 20px 24px; }
+    .plp-breadcrumb { font-size: 11px; color: var(--gray-400); margin-bottom: 8px; }
+    .plp-breadcrumb span { cursor: pointer; }
+    .plp-breadcrumb span:hover { text-decoration: underline; }
+    .plp-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .plp-title { font-size: 18px; font-weight: 800; color: var(--black); line-height: 1.2; transition: all 0.3s; }
+    .plp-title .store-in-title { color: var(--gray-600); font-weight: 600; }
+    .plp-title-actions { display: flex; gap: 10px; align-items: center; }
+    .plp-action-btn {
+      font-size: 11px; font-weight: 700; color: var(--black);
+      border: 1px solid var(--black); border-radius: 99px;
+      padding: 5px 14px; cursor: pointer; background: none;
+    }
+
+    /* Product grid */
+    .product-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .product-card { cursor: pointer; transition: opacity 0.35s ease, transform 0.35s ease; }
+    .product-card.hidden { opacity: 0; transform: scale(0.95); pointer-events: none; }
+    .product-card.collapsing { max-height: 0; overflow: hidden; }
+    .product-img {
+      background: #f5f3f0; aspect-ratio: 1; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden; margin-bottom: 10px;
+    }
+    .product-badge {
+      position: absolute; top: 8px; left: 8px; background: var(--white); color: var(--black);
+      font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 2px;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .product-img svg { width: 80%; max-width: 120px; }
+    .product-name   { font-size: 12px; font-weight: 700; margin-bottom: 2px; line-height: 1.3; color: var(--black); }
+    .product-cat    { font-size: 11px; color: var(--gray-400); margin-bottom: 3px; }
+    .product-colors { font-size: 11px; color: var(--gray-400); margin-bottom: 4px; }
+    .product-price  { font-size: 13px; font-weight: 700; color: var(--black); }
+    .product-price-bag { font-size: 11px; color: var(--orange); font-weight: 700; }
+    .product-card.available .product-img   { background: #f5f3f0; }
+    .product-card.unavailable .product-img { background: #f0f0f0; }
+
+    /* ══ STORE MODAL ════════════════════════════════════════ */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+      z-index: 500; display: flex; align-items: flex-end; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .store-modal {
+      background: var(--doc-surface);
+      border-radius: 16px 16px 0 0; width: 100%; max-width: 480px; padding: 0 0 32px;
+      transform: translateY(40px); transition: transform 0.3s ease;
+      max-height: 80vh; overflow: hidden; display: flex; flex-direction: column;
+    }
+    .modal-overlay.open .store-modal { transform: translateY(0); }
+    .modal-handle { width: 36px; height: 4px; border-radius: 2px; background: var(--doc-border); margin: 12px auto 0; }
+    .modal-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--doc-border); }
+    .modal-title  { font-size: 16px; font-weight: 800; margin-bottom: 12px; color: var(--doc-text); }
+    .modal-search {
+      width: 100%; padding: 10px 14px; border: 1px solid var(--doc-border); border-radius: 8px;
+      font-size: 14px; color: var(--doc-text); background: var(--doc-hover); outline: none;
+    }
+    .modal-search:focus { border-color: var(--infra-purple); background: var(--doc-surface); }
+    .modal-search::placeholder { color: var(--doc-subtle); }
+    .store-list { overflow-y: auto; flex: 1; }
+    .store-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 24px; cursor: pointer; border-bottom: 1px solid var(--doc-border); transition: background 0.1s;
+    }
+    .store-item:hover { background: var(--doc-hover); }
+    .store-item-name { font-size: 14px; font-weight: 700; color: var(--doc-text); margin-bottom: 2px; }
+    .store-item-meta { font-size: 12px; color: var(--doc-subtle); }
+    .store-item-avail { font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 99px; background: var(--green-bg); color: var(--green-tx); }
+
+    /* ── FLOW CARDS ──────────────────────────────────────── */
+    .flow-grid { display: flex; flex-direction: column; gap: 16px; }
+    .flow-card { background: var(--doc-surface); border: 1px solid var(--doc-border); border-radius: 10px; overflow: hidden; }
+    .flow-card-header {
+      display: flex; align-items: center; gap: 14px; padding: 20px 24px;
+      background: var(--doc-surface); cursor: pointer; border-bottom: 1px solid transparent; transition: background 0.1s;
+    }
+    .flow-card-header:hover { background: var(--doc-hover); }
+    .flow-card.open .flow-card-header { border-bottom-color: var(--doc-border); background: var(--doc-hover); }
+    .flow-num { width: 34px; height: 34px; border-radius: 50%; background: var(--infra-purple); color: #ffffff; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .flow-header-text { flex: 1; }
+    .flow-title    { font-size: 15px; font-weight: 700; line-height: 1.2; color: var(--doc-text); }
+    .flow-subtitle { font-size: 12px; color: var(--doc-subtle); margin-top: 2px; }
+    .flow-chevron  { color: var(--doc-subtle); font-size: 14px; transition: transform 0.2s; }
+    .flow-card.open .flow-chevron { transform: rotate(180deg); }
+    .flow-body { display: none; padding: 20px 24px 24px 72px; }
+    .flow-card.open .flow-body { display: block; }
+    .flow-steps { display: flex; flex-direction: column; gap: 10px; }
+    .flow-step { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--doc-muted); line-height: 1.5; }
+    .step-circle {
+      min-width: 24px; height: 24px; border-radius: 50%;
+      background: var(--doc-hover); color: var(--doc-muted);
+      font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+      margin-top: 1px; flex-shrink: 0;
+    }
+    .step-text strong { font-weight: 700; color: var(--doc-text); }
+
+    /* ── TABLE ───────────────────────────────────────────── */
+    .table-wrap { background: var(--doc-surface); border: 1px solid var(--doc-border); border-radius: 10px; overflow: hidden; }
+    .req-table { width: 100%; border-collapse: collapse; }
+    .req-table thead tr { background: var(--infra-dark); }
+    .req-table th { padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #ffffff; }
+    .req-table td { padding: 13px 16px; font-size: 14px; border-bottom: 1px solid var(--doc-border); vertical-align: top; line-height: 1.45; color: var(--doc-text); }
+    .req-table tr:last-child td { border-bottom: none; }
+    .req-table tr:hover td { background: var(--doc-hover); }
+    .ac-id { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; font-weight: 700; color: var(--doc-muted); white-space: nowrap; }
+
+    /* ── EDGE CASES ──────────────────────────────────────── */
+    .edge-grid { display: flex; flex-direction: column; gap: 12px; }
+    .edge-card {
+      background: var(--doc-surface); border: 1px solid var(--doc-border); border-radius: 8px;
+      padding: 20px 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start;
+    }
+    .edge-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .edge-scenario-label  { color: var(--infra-pink); }
+    .edge-response-label  { color: var(--blue-tx); }
+    .edge-text { font-size: 14px; color: var(--doc-muted); line-height: 1.5; }
+    .edge-text strong { color: var(--doc-text); }
+
+    /* ── QUESTIONS ───────────────────────────────────────── */
+    .questions-grid { display: flex; flex-direction: column; gap: 12px; }
+    .question-card {
+      background: var(--doc-surface); border: 1px solid var(--doc-border); border-radius: 10px;
+      padding: 20px 24px; display: flex; gap: 16px; align-items: flex-start;
+    }
+    .q-idx {
+      min-width: 30px; height: 30px; border-radius: 50%; background: var(--doc-hover);
+      font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center;
+      color: var(--doc-muted); flex-shrink: 0;
+    }
+    .q-body { flex: 1; }
+    .q-text   { font-size: 15px; font-weight: 700; margin-bottom: 8px; line-height: 1.4; color: var(--doc-text); }
+    .q-answer { font-size: 14px; color: var(--doc-muted); line-height: 1.55; margin-bottom: 10px; }
+    .q-answer.empty { color: var(--doc-subtle); font-style: italic; }
+    .q-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 99px; letter-spacing: 0.3px; }
+    .q-confirmed { background: var(--green-bg); color: var(--green-tx); }
+    .q-pending   { background: var(--amber-bg); color: var(--amber-tx); }
+    .q-brand     { background: var(--red-bg);   color: var(--red-tx);   }
+    .q-tech      { background: var(--blue-bg);  color: var(--blue-tx);  }
+
+    /* ── SCOPE OUT ───────────────────────────────────────── */
+    .scope-section { background: var(--doc-surface); border: 1px solid var(--doc-border); border-radius: 10px; padding: 24px 28px; margin-top: 32px; }
+    .scope-title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--doc-subtle); margin-bottom: 14px; }
+    .scope-list { display: flex; flex-direction: column; gap: 8px; }
+    .scope-item { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--doc-muted); }
+    .scope-x { width: 18px; height: 18px; border-radius: 50%; background: var(--doc-hover); color: var(--doc-subtle); font-size: 10px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+    /* ── MULTI-STORE FILTER ─────────────────────────────────── */
+    .pickup-label-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .pickup-hint-tag  { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; padding: 2px 7px; border-radius: 99px; background: var(--green-bg); color: var(--green-tx); flex-shrink: 0; }
+    .pickup-store-list { display: flex; flex-direction: column; }
+    .pickup-store-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 0; border-bottom: 1px solid var(--gray-100);
+      cursor: pointer;
+    }
+    .pickup-store-item:last-child { border-bottom: none; }
+    .pickup-store-item input[type="checkbox"] { accent-color: var(--black); width: 13px; height: 13px; flex-shrink: 0; cursor: pointer; }
+    .psi-disabled { opacity: 0.45; cursor: not-allowed; }
+    .psi-disabled input { cursor: not-allowed; }
+    .psi-info { display: flex; flex-direction: column; gap: 0; flex: 1; min-width: 0; }
+    .psi-name { font-size: 11px; font-weight: 700; color: var(--black); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .psi-cupo { font-size: 9px; font-weight: 700; }
+    .psi-ok   { color: var(--green-tx); }
+    .psi-full { color: var(--amber-tx); }
+
+    /* ── CATALOG LOGIC TABLE ─────────────────────────────────── */
+    .catalog-logic-grid { display: flex; flex-direction: column; gap: 1px; background: var(--doc-border); border: 1px solid var(--doc-border); border-radius: 10px; overflow: hidden; margin-bottom: 32px; }
+    .cl-row { display: grid; grid-template-columns: 1fr 1fr 1fr; background: var(--doc-surface); }
+    .cl-row.cl-header { background: var(--infra-dark); }
+    .cl-cell { padding: 12px 16px; font-size: 13px; color: var(--doc-muted); line-height: 1.4; }
+    .cl-header .cl-cell { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: rgba(255,255,255,0.7); padding: 10px 16px; }
+    .cl-surface { font-weight: 700; color: var(--doc-text); }
+    .cl-pending { font-size: 11px; color: var(--amber-tx); font-weight: 700; margin-top: 2px; }
+
+    /* ── COMING SOON ─────────────────────────────────────── */
+    .coming-soon { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 420px; text-align: center; }
+    .coming-soon-icon  { font-size: 48px; margin-bottom: 16px; opacity: 0.3; }
+    .coming-soon-title { font-size: 22px; font-weight: 800; color: var(--doc-subtle); margin-bottom: 8px; }
+    .coming-soon-desc  { font-size: 14px; color: var(--doc-subtle); }
+
+    .page-footer { text-align: center; padding: 32px 32px 44px; color: var(--doc-subtle); font-size: 12px; }
+
+    /* ── SHOE SVG ────────────────────────────────────────── */
+    .shoe-svg { width: 100%; max-width: 130px; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
+    .product-card { animation: fadeIn 0.3s ease; }
+
+    /* ── PDP STYLES ──────────────────────────────────────── */
+    .pdp-scenario-tabs {
+      display: flex; border-radius: 10px 10px 0 0; overflow: hidden;
+      border: 1px solid var(--doc-border); border-bottom: none;
+    }
+    .pdp-scenario-tab {
+      flex: 1; padding: 13px 20px; font-size: 12px; font-weight: 700; cursor: pointer;
+      border: none; background: var(--doc-hover); color: var(--doc-muted);
+      transition: all 0.15s; text-align: center;
+      display: flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap;
+    }
+    .pdp-scenario-tabs .pdp-scenario-tab:first-child { border-right: 1px solid var(--doc-border); }
+    .pdp-scenario-tab.active { background: var(--doc-surface); color: var(--doc-text); }
+    .pdp-scenario-tab .stab-tag {
+      font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 99px;
+      text-transform: uppercase; letter-spacing: 0.4px; transition: all 0.15s;
+    }
+    .pdp-scenario-tab .stab-tag-store { background: var(--doc-border); color: var(--doc-subtle); }
+    .pdp-scenario-tab.active .stab-tag-store { background: var(--blue-bg); color: var(--blue-tx); }
+    .pdp-scenario-tab .stab-tag-both  { background: var(--doc-border); color: var(--doc-subtle); }
+    .pdp-scenario-tab.active .stab-tag-both  { background: var(--green-bg); color: var(--green-tx); }
+
+    .pdp-scenario { display: none; }
+    .pdp-scenario.active { display: block; }
+
+    .pdp-context-banner {
+      padding: 7px 20px; font-size: 12px; font-weight: 700;
+      border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; gap: 6px;
+    }
+    .pdp-context-banner.banner-store { background: #e8f0fe; color: var(--blue-tx); }
+    .pdp-context-banner.banner-both  { background: var(--green-bg); color: var(--green-tx); }
+
+    .pdp-layout { display: grid; grid-template-columns: 1fr 1fr; }
+    .pdp-img-col {
+      background: var(--gray-50); display: flex; align-items: center; justify-content: center;
+      padding: 48px 40px; border-right: 1px solid var(--gray-100); min-height: 460px;
+    }
+    .pdp-info-col { padding: 28px 32px 32px; overflow-y: auto; }
+    .pdp-cat-tag  { font-size: 12px; color: var(--gray-400); margin-bottom: 6px; }
+    .pdp-name     { font-size: 22px; font-weight: 800; color: var(--black); line-height: 1.2; margin-bottom: 6px; }
+    .pdp-colors   { font-size: 12px; color: var(--gray-400); margin-bottom: 14px; }
+    .pdp-price    { font-size: 22px; font-weight: 800; color: var(--black); margin-bottom: 4px; }
+    .pdp-cuotas   { font-size: 14px; font-weight: 700; color: var(--black); margin-bottom: 3px; }
+    .pdp-impuesto { font-size: 12px; color: var(--gray-400); margin-bottom: 22px; }
+
+    .pdp-size-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .pdp-size-label  { font-size: 14px; font-weight: 700; color: var(--black); }
+    .pdp-size-guide  { font-size: 13px; color: var(--gray-600); text-decoration: underline; cursor: pointer; }
+    .pdp-size-grid   { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 16px; }
+    .pdp-size-grid-5 { grid-template-columns: repeat(5, 1fr); gap: 6px; }
+    .pdp-size-btn {
+      padding: 16px 8px; text-align: center; font-size: 15px; font-weight: 600; color: var(--black);
+      border: 1px solid var(--gray-200); border-radius: 4px; cursor: pointer; background: var(--white); transition: border-color 0.1s;
+    }
+    .pdp-size-grid-5 .pdp-size-btn { padding: 12px 4px; font-size: 12px; }
+    .pdp-size-btn:hover:not(.unavailable) { border-color: var(--black); }
+    .pdp-size-btn.selected { border-color: var(--black); border-width: 2px; font-weight: 800; }
+    .pdp-size-btn.unavailable { color: var(--gray-400); cursor: default; text-decoration: line-through; }
+
+    /* Pickup card modal */
+    .pdp-modal-location {
+      display: flex; align-items: center; gap: 8px; padding: 10px 14px;
+      border: 1px solid var(--doc-border); border-radius: 8px; margin: 0 24px;
+      background: var(--doc-hover);
+    }
+    .pdp-modal-location-icon { color: var(--doc-subtle); font-size: 14px; }
+    .pdp-modal-location-text { font-size: 13px; color: var(--doc-text); flex: 1; }
+    .pdp-modal-location-gps  { color: var(--infra-purple); font-size: 14px; cursor: pointer; }
+    .pdp-modal-section       { font-size: 12px; font-weight: 700; color: var(--doc-subtle); text-transform: uppercase; letter-spacing: 0.8px; padding: 16px 24px 8px; }
+    /* radio filter */
+    .pdp-modal-filter { display: flex; margin: 10px 24px 0; border: 1px solid var(--doc-border); border-radius: 8px; overflow: hidden; }
+    .pdp-modal-radio  { flex: 1; }
+    .pdp-modal-radio input[type="radio"] { display: none; }
+    .pdp-modal-radio label { display: block; text-align: center; padding: 9px 10px; font-size: 12px; font-weight: 600; cursor: pointer; color: var(--doc-subtle); background: var(--doc-hover); transition: background .15s, color .15s; }
+    .pdp-modal-radio:first-child label  { border-right: 1px solid var(--doc-border); }
+    .pdp-modal-radio input[type="radio"]:checked + label { background: var(--infra-dark); color: #fff; }
+    /* cupo lleno */
+    .pickup-card-capacity { font-size: 13px; font-weight: 700; color: #b45309; }
+    .pickup-card {
+      margin: 0 16px 8px; border: 1px solid var(--doc-border); border-radius: 10px;
+      padding: 14px 16px; cursor: pointer; transition: border-color 0.15s; background: var(--doc-surface);
+    }
+    .pickup-card:hover:not(.pickup-card-disabled) { border-color: var(--black); }
+    .pickup-card-disabled { opacity: 0.4; cursor: not-allowed; }
+    .pickup-card-row         { display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px; }
+    .pickup-card-name        { font-size: 14px; font-weight: 700; color: var(--doc-text); }
+    .pickup-card-avail-today { font-size: 13px; color: #1a7a34; font-weight: 600; }
+    .pickup-card-avail-days  { font-size: 13px; color: #1a7a34; font-weight: 600; }
+    .pickup-card-nostock     { font-size: 13px; color: var(--doc-subtle); }
+    .pickup-card-type-tag    { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.3px; }
+    .pct-nddc  { background: var(--amber-bg); color: var(--amber-tx); }
+    .pct-store { background: var(--blue-bg);  color: var(--blue-tx);  }
+
+    .pdp-cta-block { margin-bottom: 14px; display: flex; flex-direction: column; gap: 8px; }
+    .pdp-btn-primary {
+      width: 100%; padding: 14px 20px; font-size: 13px; font-weight: 800; letter-spacing: 0.2px;
+      color: var(--white); background: var(--black); border: none; border-radius: 40px; cursor: pointer; transition: background 0.15s;
+    }
+    .pdp-btn-primary:hover { background: #333; }
+    .pdp-btn-secondary {
+      width: 100%; padding: 13px 20px; font-size: 13px; font-weight: 700;
+      color: var(--black); background: var(--white); border: 2px solid var(--gray-200);
+      border-radius: 40px; cursor: pointer; transition: border-color 0.15s;
+    }
+    .pdp-btn-secondary:hover { border-color: var(--black); }
+
+    .pdp-fulfillment { display: flex; flex-direction: column; gap: 10px; }
+    .pdp-f-item  { display: flex; flex-direction: column; gap: 2px; }
+    .pdp-f-label { font-size: 13px; font-weight: 800; color: var(--black); }
+    .pdp-f-value { font-size: 12px; color: var(--gray-600); line-height: 1.5; }
+    .pdp-f-link  {
+      font-size: 12px; font-weight: 700; color: var(--black); text-decoration: underline;
+      cursor: pointer; display: inline; background: none; border: none; padding: 0;
+    }
+    .pdp-f-link:hover { opacity: 0.7; }
+
+    .pdp-no-ship { border: 1.5px solid #d0302a; border-radius: 4px; padding: 8px 12px; }
+    .pdp-no-ship-msg { font-size: 12px; color: #d0302a; margin-top: 1px; }
+
+    .pdp-pickup-list   { display: flex; flex-direction: column; gap: 5px; margin-top: 5px; }
+    .pdp-pickup-row    {
+      display: flex; align-items: center; justify-content: space-between;
+      border: 1px solid var(--gray-200); border-radius: 6px; padding: 9px 11px; background: var(--white);
+    }
+    .pdp-pickup-row.pickup-today { border-color: #1a7a34; background: #f8fff8; }
+    .pdp-pickup-left  { display: flex; flex-direction: column; gap: 1px; }
+    .pdp-pickup-name  { font-size: 12px; font-weight: 700; color: var(--black); }
+    .pdp-pickup-type  { font-size: 10px; color: var(--gray-400); }
+    .pdp-pickup-right { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+    .pdp-avail-today  { font-size: 11px; font-weight: 800; color: var(--green-tx); }
+    .pdp-avail-days   { font-size: 11px; font-weight: 800; color: var(--amber-tx); }
+    .pdp-pickup-tag   {
+      font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 99px;
+      text-transform: uppercase; letter-spacing: 0.3px;
+    }
+    .tag-retiro { background: var(--blue-bg);  color: var(--blue-tx);  }
+    .tag-nddc   { background: var(--amber-bg); color: var(--amber-tx); }
+    .pdp-pickup-footer  { display: flex; justify-content: flex-end; margin-top: 2px; }
+    .pdp-pickup-change  {
+      font-size: 11px; color: var(--gray-400); text-decoration: underline; cursor: pointer;
+      background: none; border: none; padding: 0;
+    }
+    .pdp-pickup-change:hover { color: var(--black); }
+
+    /* PDP Modal extras */
+    .store-item-disabled { opacity: 0.5; pointer-events: none; }
+    .avail-nddc    { background: var(--amber-bg); color: var(--amber-tx); }
+    .avail-nostock { background: var(--doc-hover); color: var(--doc-muted); }
+
+    /* ── CHO MATRIX ──────────────────────────────────────── */
+    .matrix-legend {
+      display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px;
+      padding: 14px 18px; background: var(--doc-surface); border: 1px solid var(--doc-border);
+      border-radius: 10px; align-items: center;
+    }
+    .matrix-legend-group { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+    .matrix-legend-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: var(--doc-subtle); padding-right: 2px; }
+    .matrix-legend-sep   { width: 1px; height: 24px; background: var(--doc-border); }
+
+    .matrix-wrap  { background: var(--doc-surface); border: 1px solid var(--doc-border); border-radius: 10px; overflow: hidden; overflow-x: auto; }
+    .matrix-table { width: 100%; border-collapse: collapse; min-width: 820px; }
+    .matrix-table thead tr { background: var(--infra-dark); }
+    .matrix-table th { padding: 11px 12px; text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #fff; white-space: nowrap; }
+    .matrix-table td { padding: 11px 12px; font-size: 13px; border-bottom: 1px solid var(--doc-border); vertical-align: middle; color: var(--doc-muted); line-height: 1.45; }
+    .matrix-table tr:last-child td { border-bottom: none; }
+    .matrix-table tr:not(.matrix-group-row):not(.matrix-row-hi):hover td { background: var(--doc-hover); }
+    .matrix-group-row td { background: var(--infra-dark) !important; color: rgba(255,255,255,0.55) !important; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 7px 12px; }
+    .matrix-row-hi td { background: #fffbeb; }
+    body.dark .matrix-row-hi td { background: #221c08; }
+    .matrix-empty { color: var(--doc-border); font-size: 18px; }
+    .matrix-strong { font-weight: 700; color: var(--doc-text); }
+
+    .origin-pill { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 99px; white-space: nowrap; line-height: 1.4; }
+    .op-store { background: var(--blue-bg);  color: var(--blue-tx);  }
+    .op-wh    { background: var(--amber-bg); color: var(--amber-tx); }
+    .op-both  { background: #ede9fe; color: #5b21b6; }
+    body.dark .op-both { background: #2d2366; color: #c4b5fd; }
+
+    .split-badge { display: inline-block; font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 99px; white-space: nowrap; }
+    .sb-no   { background: var(--green-bg); color: var(--green-tx); }
+    .sb-2m   { background: var(--amber-bg); color: var(--amber-tx); }
+    .sb-2t   { background: var(--blue-bg);  color: var(--blue-tx);  }
+    .sb-diff { background: #fff0e0; color: #c05621; }
+    body.dark .sb-diff { background: #2a1a08; color: #fbb06a; }
+    .sb-trip { background: var(--red-bg); color: var(--red-tx); }
+
+    .complexity-badge { display: inline-block; font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 99px; }
+    .cb-low  { background: var(--green-bg); color: var(--green-tx); }
+    .cb-mid  { background: var(--amber-bg); color: var(--amber-tx); }
+    .cb-high { background: var(--red-bg);   color: var(--red-tx);   }
+    .cb-tbd  { background: var(--doc-hover); color: var(--doc-subtle); }
+
+    .delivery-pill { display: inline-flex; align-items: center; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; white-space: nowrap; }
+    .dp-pickup   { background: #e8f0fe; color: var(--blue-tx);  }
+    .dp-shipping { background: var(--green-bg); color: var(--green-tx); }
+    .dp-point    { background: var(--amber-bg); color: var(--amber-tx); }
+    .dp-diff     { background: #fff0e0; color: #c05621; }
+
+    .delivery-stack { display: flex; flex-direction: column; gap: 4px; }
+
+    .matrix-callout {
+      display: flex; gap: 14px; align-items: flex-start; margin-top: 20px;
+      background: #fffbeb; border: 1px solid #fcd34d55; border-radius: 10px;
+      padding: 16px 20px; font-size: 13px; line-height: 1.6; color: #92400e;
+    }
+    body.dark .matrix-callout { background: #221c08; border-color: #6b3a1022; color: #fbbf24; }
+    .matrix-callout-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+
+    /* ── INTRO SECTION ──────────────────────────────────────── */
+    .intro-section-label {
+      font-size: 11px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 2px; color: var(--doc-subtle); margin: 40px 0 16px;
+    }
+    .model-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .model-card {
+      background: var(--doc-surface); border: 1px solid var(--doc-border);
+      border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .model-active { cursor: pointer; border-color: var(--infra-purple); transition: box-shadow 0.15s, transform 0.15s; }
+    .model-active:hover { box-shadow: 0 6px 24px rgba(120,110,254,0.2); transform: translateY(-2px); }
+    .model-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+    .model-code  { font-size: 13px; font-weight: 900; letter-spacing: 1.5px; color: var(--doc-text); font-family: 'SF Mono', 'Fira Code', monospace; }
+    .model-badge { font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .badge-active  { background: var(--green-bg); color: var(--green-tx); }
+    .badge-pending { background: var(--amber-bg); color: var(--amber-tx); }
+    .badge-roadmap { background: var(--doc-hover); color: var(--doc-subtle); }
+    .model-name { font-size: 15px; font-weight: 700; line-height: 1.3; color: var(--doc-text); }
+    .model-desc { font-size: 13px; color: var(--doc-muted); line-height: 1.6; flex: 1; }
+    .model-pending .model-name, .model-pending .model-code, .model-pending .model-desc { color: var(--doc-subtle); }
+    .model-roadmap .model-name, .model-roadmap .model-code, .model-roadmap .model-desc { color: var(--doc-subtle); }
+    .model-footer { padding-top: 14px; border-top: 1px solid var(--doc-border); margin-top: 4px; }
+    .model-meta-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--doc-subtle); margin-bottom: 2px; }
+    .model-meta-value { font-size: 12px; font-weight: 600; color: var(--doc-text); margin-bottom: 8px; }
+    .model-cta { font-size: 12px; font-weight: 700; color: var(--infra-purple); text-decoration: underline; display: inline-block; }
+    .doc-metadata {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1px; background: var(--doc-border);
+      border: 1px solid var(--doc-border); border-radius: 10px; overflow: hidden;
+    }
+    .doc-meta-item  { background: var(--doc-surface); padding: 16px 20px; }
+    .doc-meta-value { font-size: 14px; font-weight: 600; color: var(--doc-text); margin-top: 4px; }
+  </style>
+</head>
+<body>
+
+<!-- ══ TOP BAR ══════════════════════════════════════════════ -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="infra-logo">
+      <div class="infra-logo-icon"></div>
+      <span class="infra-logo-text">infra<strong>commerce</strong></span>
+    </div>
+    <span class="topbar-divider">|</span>
+    <span class="topbar-client">NIKE AR</span>
+    <span class="topbar-divider">/</span>
+    <span class="topbar-title">Requerimiento Omnicanal</span>
+  </div>
+  <div class="topbar-right">
+    <span class="topbar-badge">BOPIS</span>
+    <button class="darkmode-btn" id="darkToggle" onclick="toggleDark()" title="Toggle dark mode">
+      <span id="darkIcon">◑</span>
+    </button>
+  </div>
+</div>
+
+<!-- ══ JOURNEY NAV ══════════════════════════════════════════ -->
+<nav class="journey-bar">
+  <div class="journey-step active" onclick="switchJourney('intro')">
+    <span class="step-pill">●</span>INTRO
+  </div>
+  <span class="journey-arrow">›</span>
+  <div class="journey-step" onclick="switchJourney('plp')">
+    <span class="step-pill">1</span>PLP
+  </div>
+  <span class="journey-arrow">›</span>
+  <div class="journey-step" onclick="switchJourney('pdp')">
+    <span class="step-pill">2</span>PDP
+  </div>
+  <span class="journey-arrow">›</span>
+  <div class="journey-step" onclick="switchJourney('cart')">
+    <span class="step-pill">3</span>CART
+  </div>
+  <span class="journey-arrow">›</span>
+  <div class="journey-step" onclick="switchJourney('checkout')">
+    <span class="step-pill">4</span>CHO
+  </div>
+</nav>
+
+<!-- ══ INTRO SECTION ════════════════════════════════════════ -->
+<section id="section-intro" class="page-section active">
+  <div class="main">
+
+    <!-- Hero card -->
+    <div class="objective-card">
+      <div class="objective-tag">Omnicanalidad Nike AR — Propuesta de Valor</div>
+      <div class="objective-title">Retiro Express — Ampliá el catálogo disponible con stock de tienda</div>
+      <div class="objective-desc">
+        Una de las propuestas de valor centrales de la Omnicanalidad Nike AR es el <strong>Retiro Express</strong>: la posibilidad de retirar en el mismo día en una tienda física. Esto amplía el catálogo disponible para el usuario — por defecto el ecommerce muestra el stock del Centro de Distribución (CD/warehouse), pero al activar el filtro <em>Retiro Express</em> accede también al stock de las tiendas habilitadas. El filtro opera filtrando por seller en VTEX, y la disponibilidad de cada tienda está directamente ligada a los cupos de su PickupPoint.
+      </div>
+      <div class="objective-meta">
+        <div class="meta-item">
+          <div class="meta-label">Cliente</div>
+          <div class="meta-value">Nike Argentina / Nike Uruguay</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Plataforma</div>
+          <div class="meta-value">VTEX IO</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Tiendas físicas</div>
+          <div class="meta-value">17 Nike AR</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Estado</div>
+          <div class="meta-value">En definición</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modelos de fulfillment -->
+    <div class="intro-section-label">Modelos de fulfillment</div>
+    <div class="model-grid">
+
+      <div class="model-card model-active" onclick="switchJourney('plp')">
+        <div class="model-card-header">
+          <span class="model-code">BOPIS</span>
+          <span class="model-badge badge-active">En curso</span>
+        </div>
+        <div class="model-name">Buy Online, Pick Up In Store</div>
+        <div class="model-desc">El cliente compra en el sitio web y retira el pedido en una tienda Nike AR de su elección. El stock de tienda se expone en el ecommerce para habilitar el retiro.</div>
+        <div class="model-footer">
+          <div class="model-meta-label">Journey documentado</div>
+          <div class="model-meta-value">PLP · PDP · CART · CHO</div>
+          <span class="model-cta">Ver requerimiento →</span>
+        </div>
+      </div>
+
+      <div class="model-card model-pending">
+        <div class="model-card-header">
+          <span class="model-code">DSIS</span>
+          <span class="model-badge badge-pending">A definir</span>
+        </div>
+        <div class="model-name">Compra en tienda, retiro en otra</div>
+        <div class="model-desc">El cliente compra físicamente en una tienda pero elige retirar el pedido en otra tienda Nike AR de su preferencia. Requiere transferencia de stock entre sucursales.</div>
+        <div class="model-footer">
+          <div class="model-meta-label">Alcance</div>
+          <div class="model-meta-value">A definir con la marca</div>
+        </div>
+      </div>
+
+      <div class="model-card model-roadmap">
+        <div class="model-card-header">
+          <span class="model-code">SFS</span>
+          <span class="model-badge badge-roadmap">2027</span>
+        </div>
+        <div class="model-name">Ship From Store</div>
+        <div class="model-desc">El pedido se prepara y despacha directamente desde una tienda física, optimizando tiempos de entrega y reduciendo la dependencia del warehouse central.</div>
+        <div class="model-footer">
+          <div class="model-meta-label">Roadmap</div>
+          <div class="model-meta-value">Versión 2027</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Lógica del catálogo -->
+    <div class="intro-section-label">Lógica del catálogo según superficie</div>
+    <div class="catalog-logic-grid">
+      <div class="cl-row cl-header">
+        <div class="cl-cell">Superficie</div>
+        <div class="cl-cell">Stock mostrado</div>
+        <div class="cl-cell">Notas</div>
+      </div>
+      <div class="cl-row">
+        <div class="cl-cell cl-surface">Catálogo / PLP sin filtro</div>
+        <div class="cl-cell"><span class="origin-pill op-wh">CD (warehouse)</span></div>
+        <div class="cl-cell">Comportamiento estándar. El usuario ve el catálogo completo del Centro de Distribución.</div>
+      </div>
+      <div class="cl-row">
+        <div class="cl-cell cl-surface">Buscador</div>
+        <div class="cl-cell"><span class="origin-pill op-wh">CD (warehouse)</span></div>
+        <div class="cl-cell">Siempre muestra stock de CD. No incorpora contexto de seller aunque el usuario tenga tienda seleccionada.
+          <div class="cl-pending">⚠ Pendiente confirmar: ¿el buscador respeta el seller si hay filtro Retiro Express activo?</div>
+        </div>
+      </div>
+      <div class="cl-row">
+        <div class="cl-cell cl-surface">Filtro "Retiro Express" activo</div>
+        <div class="cl-cell"><span class="origin-pill op-store">Stock de tienda (seller)</span></div>
+        <div class="cl-cell">Filtra por seller en VTEX. El usuario puede seleccionar una o más tiendas simultáneamente. Solo aparecen habilitadas las tiendas con cupo disponible en su PickupPoint.</div>
+      </div>
+    </div>
+
+    <!-- Stack técnico -->
+    <div class="intro-section-label">Stack técnico relevante</div>
+    <div class="table-wrap" style="margin-bottom: 8px;">
+      <table class="req-table">
+        <thead>
+          <tr><th>Componente</th><th>Repo / App</th><th>Función</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>PLP Storefront</td>
+            <td><code>nikear.search-result</code> v4.0.38</td>
+            <td>Fork de vtex.search-result — renderiza la PLP con el toggle BOPIS</td>
+          </tr>
+          <tr>
+            <td>Pickup Service</td>
+            <td><code>nikearprod.pickup-service</code></td>
+            <td>Endpoint <code>GET /_v/private/pickup-service/pickup-points</code> — lista puntos de retiro activos</td>
+          </tr>
+          <tr>
+            <td>Persistencia de tienda</td>
+            <td>localStorage</td>
+            <td>Guarda la tienda seleccionada por el usuario entre sesiones del navegador</td>
+          </tr>
+          <tr>
+            <td>Tracking</td>
+            <td>GA4 / dataLayer</td>
+            <td>Evento <code>pickup_filter_activated</code> al activar el filtro de tienda</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Metadata del documento -->
+    <div class="intro-section-label">Metadata del documento</div>
+    <div class="doc-metadata">
+      <div class="doc-meta-item">
+        <div class="meta-label">Versión</div>
+        <div class="doc-meta-value">v1.0</div>
+      </div>
+      <div class="doc-meta-item">
+        <div class="meta-label">Fecha</div>
+        <div class="doc-meta-value">Junio 2025</div>
+      </div>
+      <div class="doc-meta-item">
+        <div class="meta-label">Responsable</div>
+        <div class="doc-meta-value">Juan Pablo Camaño · PM eCommerce</div>
+      </div>
+      <div class="doc-meta-item">
+        <div class="meta-label">Estado</div>
+        <div class="doc-meta-value">En refinamiento</div>
+      </div>
+      <div class="doc-meta-item">
+        <div class="meta-label">Plataforma</div>
+        <div class="doc-meta-value">VTEX IO</div>
+      </div>
+      <div class="doc-meta-item">
+        <div class="meta-label">Tiendas físicas</div>
+        <div class="doc-meta-value">17 Nike AR</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══ PLP SECTION ══════════════════════════════════════════ -->
+<section id="section-plp" class="page-section">
+  <div class="main">
+
+    <!-- Objetivo -->
+    <div class="objective-card">
+      <div class="objective-tag">Objetivo — PLP</div>
+      <div class="objective-title">Filtro Retiro Express: selección de tienda(s) en PLP para ver stock disponible hoy</div>
+      <div class="objective-desc">
+        El filtro <strong>Retiro Express</strong> permite al usuario ver, dentro de la PLP, los productos con stock disponible para retiro en el día en una o varias tiendas Nike AR. Por defecto la PLP muestra el catálogo del CD (warehouse). Al activar el filtro, la búsqueda filtra por seller — el usuario puede seleccionar múltiples tiendas simultáneamente. Solo las tiendas con cupo disponible en su PickupPoint aparecen habilitadas; las de cupo lleno se muestran deshabilitadas.
+      </div>
+      <div class="objective-meta">
+        <div class="meta-item">
+          <div class="meta-label">Proyecto</div>
+          <div class="meta-value">BOPIS — Buy Online, Pick Up In Store</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Plataforma</div>
+          <div class="meta-value">VTEX IO — nikear.search-result</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Tiendas físicas</div>
+          <div class="meta-value">17 Nike AR</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-label">Estado</div>
+          <div class="meta-value">En definición</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="switchTab(this,'demo')">Demo visual</button>
+      <button class="tab-btn" onclick="switchTab(this,'flujos')">Flujos a cubrir</button>
+      <button class="tab-btn" onclick="switchTab(this,'criterios')">Criterios de aceptación</button>
+      <button class="tab-btn" onclick="switchTab(this,'comportamiento')">Comportamiento edge</button>
+      <button class="tab-btn" onclick="switchTab(this,'preguntas')">Preguntas abiertas</button>
+    </div>
+
+    <!-- ─────────────────────────────────────────────────────
+         TAB: DEMO VISUAL
+    ───────────────────────────────────────────────────── -->
+    <div id="tab-demo" class="tab-pane active">
+
+      <div class="demo-container">
+        <div class="demo-legend">
+          <p class="demo-legend-text">
+            Interacción: seleccioná una o varias tiendas en el filtro <strong>"Retiro Express"</strong> del sidebar para ver el catálogo de tienda en acción.
+          </p>
+          <div class="demo-controls">
+            <span id="stateBadge" class="demo-state-badge state-default">Sin filtro · 61 resultados (stock CD)</span>
+            <button class="demo-reset-btn" onclick="resetDemo()">↺ Resetear demo</button>
+          </div>
+        </div>
+
+        <!-- Browser frame -->
+        <div class="browser-frame">
+
+          <!-- Browser bar -->
+          <div class="browser-bar">
+            <div class="browser-dots">
+              <div class="dot dot-r"></div>
+              <div class="dot dot-y"></div>
+              <div class="dot dot-g"></div>
+            </div>
+            <div class="browser-url-bar">
+              <span class="url-lock">🔒</span>
+              <span>nike.com.ar/air-force-1</span>
+            </div>
+          </div>
+
+          <!-- Nike mini header -->
+          <div class="nike-header">
+            <div class="nike-logo">NIKE</div>
+            <div class="nike-nav">
+              <span>Hombres</span><span>Mujeres</span><span>Kids</span><span>Jordan</span><span>Sale</span>
+            </div>
+            <div class="nike-actions">
+              <span>🔍</span><span>♡</span><span>👤</span>
+            </div>
+          </div>
+
+          <!-- PLP layout -->
+          <div class="plp-layout">
+
+            <!-- Sidebar -->
+            <div class="plp-sidebar">
+
+              <!-- Retiro Express multi-store filter -->
+              <div class="pickup-section">
+                <div class="pickup-label-row">
+                  <span class="pickup-label">Retiro Express</span>
+                  <span class="pickup-hint-tag">Mismo día</span>
+                </div>
+                <div class="pickup-store-list">
+                  <label class="pickup-store-item">
+                    <input type="checkbox" id="store-palermo" onchange="handleStoreCheck(this,'Nike Palermo')">
+                    <div class="psi-info">
+                      <span class="psi-name">Nike Palermo</span>
+                      <span class="psi-cupo psi-ok">Disponible · 4 cupos</span>
+                    </div>
+                  </label>
+                  <label class="pickup-store-item">
+                    <input type="checkbox" id="store-abasto" onchange="handleStoreCheck(this,'Nike Abasto')">
+                    <div class="psi-info">
+                      <span class="psi-name">Nike Abasto</span>
+                      <span class="psi-cupo psi-ok">Disponible · 7 cupos</span>
+                    </div>
+                  </label>
+                  <label class="pickup-store-item">
+                    <input type="checkbox" id="store-altop" onchange="handleStoreCheck(this,'Nike Alto Palermo')">
+                    <div class="psi-info">
+                      <span class="psi-name">Nike Alto Palermo</span>
+                      <span class="psi-cupo psi-ok">Disponible · 2 cupos</span>
+                    </div>
+                  </label>
+                  <label class="pickup-store-item psi-disabled">
+                    <input type="checkbox" disabled>
+                    <div class="psi-info">
+                      <span class="psi-name">Nike Dot</span>
+                      <span class="psi-cupo psi-full">Cupo lleno</span>
+                    </div>
+                  </label>
+                  <label class="pickup-store-item">
+                    <input type="checkbox" id="store-florida" onchange="handleStoreCheck(this,'Nike Florida')">
+                    <div class="psi-info">
+                      <span class="psi-name">Nike Florida</span>
+                      <span class="psi-cupo psi-ok">Disponible · 5 cupos</span>
+                    </div>
+                  </label>
+                  <label class="pickup-store-item psi-disabled">
+                    <input type="checkbox" disabled>
+                    <div class="psi-info">
+                      <span class="psi-name">Nike Unicenter</span>
+                      <span class="psi-cupo psi-full">Cupo lleno</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Filters -->
+              <div class="filter-group">
+                <div class="filter-group-row"><span class="filter-group-name">Top (largo)</span><span class="filter-chevron">▾</span></div>
+                <div class="filter-group-row"><span class="filter-group-name">Género</span><span class="filter-chevron">▾</span></div>
+                <div class="filter-group-row"><span class="filter-group-name">Kids</span><span class="filter-chevron">▾</span></div>
+                <div class="filter-group-row"><span class="filter-group-name">Sale</span><span class="filter-chevron">▾</span></div>
+                <div class="filter-group-row"><span class="filter-group-name">Color</span><span class="filter-chevron">▾</span></div>
+              </div>
+
+            </div>
+
+            <!-- Main content -->
+            <div class="plp-content">
+              <div class="plp-breadcrumb">
+                <span>Shoes</span> / <span>Air Force 1</span>
+              </div>
+              <div class="plp-title-row">
+                <h2 class="plp-title" id="plpTitle">Air Force 1 <span id="resultCount">(61)</span></h2>
+                <div class="plp-title-actions">
+                  <button class="plp-action-btn">Ocultar filtros</button>
+                  <button class="plp-action-btn">Ordenar por ▾</button>
+                </div>
+              </div>
+
+              <!-- Product grid -->
+              <div class="product-grid" id="productGrid">
+
+                <!-- Card 1 — AVAILABLE -->
+                <div class="product-card available" data-available="true">
+                  <div class="product-img">
+                    <span class="product-badge">Best Seller</span>
+                    <svg class="shoe-svg" viewBox="0 0 160 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <ellipse cx="80" cy="88" rx="68" ry="8" fill="#e0e0e0"/>
+                      <path d="M 18 78 Q 22 48 60 42 Q 95 36 138 54 Q 150 62 150 78 Z" fill="#f0f0f0" stroke="#e0e0e0" stroke-width="1.5"/>
+                      <path d="M 18 78 Q 16 84 20 86 L 142 86 Q 148 84 150 78 Z" fill="#e8e8e8" stroke="#ddd" stroke-width="1"/>
+                      <path d="M 55 41 L 62 18 Q 65 13 70 18 L 67 41" fill="#efefef" stroke="#e0e0e0" stroke-width="1"/>
+                      <line x1="57" y1="35" x2="67" y2="35" stroke="#d8d8d8" stroke-width="1.5" stroke-linecap="round"/>
+                      <line x1="56" y1="29" x2="67" y2="28" stroke="#d8d8d8" stroke-width="1.5" stroke-linecap="round"/>
+                      <line x1="57" y1="23" x2="67" y2="22" stroke="#d8d8d8" stroke-width="1.5" stroke-linecap="round"/>
+                      <path d="M 65 68 Q 90 55 140 64" stroke="#c8c8c8" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    </svg>
+                  </div>
+                  <div class="product-name">Air Force 1 '07</div>
+                  <div class="product-cat">Calzado para Hombre</div>
+                  <div class="product-colors">4 Colores</div>
+                  <div class="product-price">$115</div>
+                </div>
+
+                <!-- Card 2 — AVAILABLE -->
+                <div class="product-card available" data-available="true">
+                  <div class="product-img">
+                    <span class="product-badge">Best Seller</span>
+                    <svg class="shoe-svg" viewBox="0 0 160 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <ellipse cx="80" cy="88" rx="68" ry="8" fill="#e0e0e0"/>
+                      <path d="M 18 78 Q 22 48 60 42 Q 95 36 138 54 Q 150 62 150 78 Z" fill="#f0f0f0" stroke="#e0e0e0" stroke-width="1.5"/>
+                      <path d="M 18 78 Q 16 84 20 86 L 142 86 Q 148 84 150 78 Z" fill="#e8e8e8" stroke="#ddd" stroke-width="1"/>
+                      <path d="M 55 41 L 62 18 Q 65 13 70 18 L 67 41" fill="#efefef" stroke="#e0e0e0" stroke-width="1"/>
+                      <line x1="57" y1="35" x2="67" y2="35" stroke="#d8d8d8" stroke-width="1.5" stroke-linecap="round"/>
+                      <line x1="56" y1="29" x2="67" y2="28" stroke="#d8d8d8" stroke-width="1.5" stroke-linecap="round"/>
+                      <line x1="57" y1="23" x2="67" y2="22" stroke="#d8d8d8" stroke-width="1.5" stroke-linecap="round"/>
+                      <path d="M 65 68 Q 90 55 140 64" stroke="#c8c8c8" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    </svg>
+                  </div>
+                  <div class="product-name">Air Force 1 '07</div>
+                  <div class="product-cat">Calzado para Mujer</div>
+                  <div class="product-colors">2 Colores</div>
+                  <div class="product-price">$115</div>
+                </div>
+
+                <!-- Card 3 — NOT AVAILABLE -->
+                <div class="product-card unavailable" data-available="false">
+                  <div class="product-img">
+                    <svg class="shoe-svg" viewBox="0 0 160 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <ellipse cx="80" cy="88" rx="68" ry="8" fill="#e8e8e8"/>
+                      <path d="M 18 78 Q 22 48 60 42 Q 95 36 138 54 Q 150 62 150 78 Z" fill="#ebebeb" stroke="#e0e0e0" stroke-width="1.5"/>
+                      <path d="M 18 78 Q 16 84 20 86 L 142 86 Q 148 84 150 78 Z" fill="#e3e3e3" stroke="#d8d8d8" stroke-width="1"/>
+                      <path d="M 55 41 L 62 18 Q 65 13 70 18 L 67 41" fill="#e8e8e8" stroke="#e0e0e0" stroke-width="1"/>
+                      <line x1="57" y1="35" x2="67" y2="35" stroke="#d0d0d0" stroke-width="1.5" stroke-linecap="round"/>
+                      <line x1="56" y1="29" x2="67" y2="28" stroke="#d0d0d0" stroke-width="1.5" stroke-linecap="round"/>
+                      <path d="M 65 68 Q 90 55 140 64" stroke="#d0d0d0" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    </svg>
+                  </div>
+                  <div class="product-name">Air Force 1 Shadow</div>
+                  <div class="product-cat">Calzado para Mujer</div>
+                  <div class="product-colors">3 Colores</div>
+                  <div class="product-price">$120</div>
+                </div>
+
+                <!-- Card 4 — AVAILABLE -->
+                <div class="product-card available" data-available="true">
+                  <div class="product-img">
+                    <svg class="shoe-svg" viewBox="0 0 160 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <ellipse cx="80" cy="88" rx="68" ry="8" fill="#e0e0e0"/>
+                      <path d="M 18 78 Q 22 48 60 42 Q 95 36 138 54 Q 150 62 150 78 Z" fill="#f0f0f0" stroke="#e0e0e0" stroke-width="1.5"/>
+                      <path d="M 18 78 Q 16 84 20 86 L 142 86 Q 148 84 150 78 Z" fill="#e8e8e8" stroke="#ddd" stroke-width="1"/>
+                      <path d="M 55 41 L 62 18 Q 65 13 70 18 L 67 41" fill="#efefef" stroke="#e0e0e0" stroke-width="1"/>
+                      <line x1="57" y1="35" x2="67" y2="35" stroke="#d8d8d8" stroke-width="1.5" stroke-linecap="round"/>
+                      <line x1="56" y1="29" x2="67" y2="28" stroke="#d8d8d8" stroke-width="1.5" stroke-linecap="round"/>
+                      <line x1="57" y1="23" x2="67" y2="22" stroke="#d8d8d8" stroke-width="1.5" stroke-linecap="round"/>
+                      <path d="M 65 68 Q 90 55 140 64" stroke="#c8c8c8" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    </svg>
+                  </div>
+                  <div class="product-name">Air Force 1 EasyOn</div>
+                  <div class="product-cat">Calzado para Mujer</div>
+                  <div class="product-colors">1 Color</div>
+                  <div class="product-price-bag">Ver precio en bolsa</div>
+                </div>
+
+                <!-- Card 5 — NOT AVAILABLE -->
+                <div class="product-card unavailable" data-available="false">
+                  <div class="product-img">
+                    <svg class="shoe-svg" viewBox="0 0 160 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <ellipse cx="80" cy="88" rx="68" ry="8" fill="#e8e8e8"/>
+                      <path d="M 18 78 Q 22 48 60 42 Q 95 36 138 54 Q 150 62 150 78 Z" fill="#ebebeb" stroke="#e0e0e0" stroke-width="1.5"/>
+                      <path d="M 18 78 Q 16 84 20 86 L 142 86 Q 148 84 150 78 Z" fill="#e3e3e3" stroke="#d8d8d8" stroke-width="1"/>
+                      <path d="M 55 41 L 62 18 Q 65 13 70 18 L 67 41" fill="#e8e8e8" stroke="#e0e0e0" stroke-width="1"/>
+                      <path d="M 65 68 Q 90 55 140 64" stroke="#d0d0d0" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    </svg>
+                  </div>
+                  <div class="product-name">Air Force 1 High '07</div>
+                  <div class="product-cat">Calzado para Hombre</div>
+                  <div class="product-colors">2 Colores</div>
+                  <div class="product-price">$130</div>
+                </div>
+
+                <!-- Card 6 — NOT AVAILABLE -->
+                <div class="product-card unavailable" data-available="false">
+                  <div class="product-img">
+                    <svg class="shoe-svg" viewBox="0 0 160 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <ellipse cx="80" cy="88" rx="68" ry="8" fill="#e8e8e8"/>
+                      <path d="M 18 78 Q 22 48 60 42 Q 95 36 138 54 Q 150 62 150 78 Z" fill="#ebebeb" stroke="#e0e0e0" stroke-width="1.5"/>
+                      <path d="M 18 78 Q 16 84 20 86 L 142 86 Q 148 84 150 78 Z" fill="#e3e3e3" stroke="#d8d8d8" stroke-width="1"/>
+                      <path d="M 55 41 L 62 18 Q 65 13 70 18 L 67 41" fill="#e8e8e8" stroke="#e0e0e0" stroke-width="1"/>
+                      <path d="M 65 68 Q 90 55 140 64" stroke="#d0d0d0" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    </svg>
+                  </div>
+                  <div class="product-name">Air Force 1 Crater</div>
+                  <div class="product-cat">Calzado Unisex</div>
+                  <div class="product-colors">1 Color</div>
+                  <div class="product-price">$135</div>
+                </div>
+
+                <!-- Card 7 — AVAILABLE -->
+                <div class="product-card available" data-available="true">
+                  <div class="product-img">
+                    <span class="product-badge">Best Seller</span>
+                    <svg class="shoe-svg" viewBox="0 0 160 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <ellipse cx="80" cy="88" rx="68" ry="8" fill="#e0e0e0"/>
+                      <path d="M 18 78 Q 22 48 60 42 Q 95 36 138 54 Q 150 62 150 78 Z" fill="#f0f0f0" stroke="#e0e0e0" stroke-width="1.5"/>
+                      <path d="M 18 78 Q 16 84 20 86 L 142 86 Q 148 84 150 78 Z" fill="#e8e8e8" stroke="#ddd" stroke-width="1"/>
+                      <path d="M 55 41 L 62 18 Q 65 13 70 18 L 67 41" fill="#efefef" stroke="#e0e0e0" stroke-width="1"/>
+                      <line x1="57" y1="35" x2="67" y2="35" stroke="#d8d8d8" stroke-width="1.5" stroke-linecap="round"/>
+                      <line x1="56" y1="29" x2="67" y2="28" stroke="#d8d8d8" stroke-width="1.5" stroke-linecap="round"/>
+                      <line x1="57" y1="23" x2="67" y2="22" stroke="#d8d8d8" stroke-width="1.5" stroke-linecap="round"/>
+                      <path d="M 65 68 Q 90 55 140 64" stroke="#c8c8c8" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    </svg>
+                  </div>
+                  <div class="product-name">Air Force 1 LE</div>
+                  <div class="product-cat">Calzado para Niños</div>
+                  <div class="product-colors">2 Colores</div>
+                  <div class="product-price">$100</div>
+                </div>
+
+                <!-- Card 8 — NOT AVAILABLE -->
+                <div class="product-card unavailable" data-available="false">
+                  <div class="product-img">
+                    <svg class="shoe-svg" viewBox="0 0 160 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <ellipse cx="80" cy="88" rx="68" ry="8" fill="#e8e8e8"/>
+                      <path d="M 18 78 Q 22 48 60 42 Q 95 36 138 54 Q 150 62 150 78 Z" fill="#ebebeb" stroke="#e0e0e0" stroke-width="1.5"/>
+                      <path d="M 18 78 Q 16 84 20 86 L 142 86 Q 148 84 150 78 Z" fill="#e3e3e3" stroke="#d8d8d8" stroke-width="1"/>
+                      <path d="M 55 41 L 62 18 Q 65 13 70 18 L 67 41" fill="#e8e8e8" stroke="#e0e0e0" stroke-width="1"/>
+                      <path d="M 65 68 Q 90 55 140 64" stroke="#d0d0d0" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    </svg>
+                  </div>
+                  <div class="product-name">Air Force 1 PLT.AF.ORM</div>
+                  <div class="product-cat">Calzado para Mujer</div>
+                  <div class="product-colors">2 Colores</div>
+                  <div class="product-price">$125</div>
+                </div>
+
+                <!-- Card 9 — NOT AVAILABLE -->
+                <div class="product-card unavailable" data-available="false">
+                  <div class="product-img">
+                    <svg class="shoe-svg" viewBox="0 0 160 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <ellipse cx="80" cy="88" rx="68" ry="8" fill="#e8e8e8"/>
+                      <path d="M 18 78 Q 22 48 60 42 Q 95 36 138 54 Q 150 62 150 78 Z" fill="#ebebeb" stroke="#e0e0e0" stroke-width="1.5"/>
+                      <path d="M 18 78 Q 16 84 20 86 L 142 86 Q 148 84 150 78 Z" fill="#e3e3e3" stroke="#d8d8d8" stroke-width="1"/>
+                      <path d="M 55 41 L 62 18 Q 65 13 70 18 L 67 41" fill="#e8e8e8" stroke="#e0e0e0" stroke-width="1"/>
+                      <path d="M 65 68 Q 90 55 140 64" stroke="#d0d0d0" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    </svg>
+                  </div>
+                  <div class="product-name">Air Force 1 React</div>
+                  <div class="product-cat">Calzado para Hombre</div>
+                  <div class="product-colors">1 Color</div>
+                  <div class="product-price">$140</div>
+                </div>
+
+              </div><!-- /product-grid -->
+            </div><!-- /plp-content -->
+          </div><!-- /plp-layout -->
+        </div><!-- /browser-frame -->
+      </div><!-- /demo-container -->
+    </div><!-- /tab-demo -->
+
+    <!-- ─────────────────────────────────────────────────────
+         TAB: FLUJOS
+    ───────────────────────────────────────────────────── -->
+    <div id="tab-flujos" class="tab-pane">
+      <p class="section-intro">Tres flujos según el estado del usuario al llegar a la PLP. El filtro "Retiro Express" en el sidebar es el punto de entrada en todos los casos. Sin filtro activo, la PLP muestra siempre el catálogo del CD (warehouse).</p>
+      <div class="flow-grid">
+
+        <div class="flow-card open">
+          <div class="flow-card-header" onclick="toggleFlow(this)">
+            <div class="flow-num">1</div>
+            <div class="flow-header-text">
+              <div class="flow-title">Usuario activa Retiro Express por primera vez</div>
+              <div class="flow-subtitle">Sin tiendas seleccionadas previas · primera interacción con el filtro</div>
+            </div>
+            <span class="flow-chevron">▾</span>
+          </div>
+          <div class="flow-body">
+            <div class="flow-steps">
+              <div class="flow-step"><span class="step-circle">1</span><span class="step-text">El usuario llega a la PLP y ve el catálogo del <strong>Centro de Distribución (CD)</strong>. El filtro "Retiro Express" está visible en el panel lateral con la lista de tiendas.</span></div>
+              <div class="flow-step"><span class="step-circle">2</span><span class="step-text">Las tiendas con cupo disponible aparecen con checkbox <strong>habilitado</strong>. Las tiendas con cupo lleno aparecen con checkbox <strong>deshabilitado</strong> (visibles pero no seleccionables).</span></div>
+              <div class="flow-step"><span class="step-circle">3</span><span class="step-text">El usuario selecciona una o más tiendas. El filtro opera como filtro de <strong>seller</strong> en VTEX — no hay un modal intermedio.</span></div>
+              <div class="flow-step"><span class="step-circle">4</span><span class="step-text">La PLP se actualiza mostrando solo productos con stock en las tiendas seleccionadas. El título y conteo cambian: <strong>"Air Force 1 · Retiro Express (13 resultados)"</strong>.</span></div>
+              <div class="flow-step"><span class="step-circle">5</span><span class="step-text">La selección de tiendas queda <strong>persistida</strong> (localStorage) para las próximas visitas del usuario.</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-card">
+          <div class="flow-card-header" onclick="toggleFlow(this)">
+            <div class="flow-num">2</div>
+            <div class="flow-header-text">
+              <div class="flow-title">Usuario regresa con tiendas ya seleccionadas</div>
+              <div class="flow-subtitle">Sesión persistida · checkboxes pre-marcados al ingresar</div>
+            </div>
+            <span class="flow-chevron">▾</span>
+          </div>
+          <div class="flow-body">
+            <div class="flow-steps">
+              <div class="flow-step"><span class="step-circle">1</span><span class="step-text">El usuario llega a la PLP y las tiendas previamente seleccionadas aparecen con sus checkboxes marcados. La PLP muestra el catálogo filtrado desde el primer render.</span></div>
+              <div class="flow-step"><span class="step-circle">2</span><span class="step-text">Puede <strong>deseleccionar</strong> tiendas para ampliar el catálogo (vuelve parcialmente hacia el CD).</span></div>
+              <div class="flow-step"><span class="step-circle">3</span><span class="step-text">Puede <strong>agregar</strong> más tiendas si tienen cupo disponible, expandiendo el catálogo de retiro.</span></div>
+              <div class="flow-step"><span class="step-circle">4</span><span class="step-text">Si deselecciona todas las tiendas, la PLP vuelve al catálogo completo del <strong>CD (warehouse)</strong>.</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-card">
+          <div class="flow-card-header" onclick="toggleFlow(this)">
+            <div class="flow-num">3</div>
+            <div class="flow-header-text">
+              <div class="flow-title">Sin filtro activo — catálogo CD (estado por defecto)</div>
+              <div class="flow-subtitle">Navegación estándar · sin tiendas seleccionadas en Retiro Express</div>
+            </div>
+            <span class="flow-chevron">▾</span>
+          </div>
+          <div class="flow-body">
+            <div class="flow-steps">
+              <div class="flow-step"><span class="step-circle">1</span><span class="step-text">La PLP muestra el catálogo del <strong>Centro de Distribución (CD/warehouse)</strong>. Experiencia estándar sin cambios para el usuario.</span></div>
+              <div class="flow-step"><span class="step-circle">2</span><span class="step-text">El buscador también retorna siempre stock de <strong>CD</strong>, independientemente de si el usuario tiene tiendas guardadas.</span></div>
+              <div class="flow-step"><span class="step-circle">3</span><span class="step-text">El panel "Retiro Express" es visible pero sin checkboxes marcados — punto de entrada al flujo omnicanal.</span></div>
+              <div class="flow-step"><span class="step-circle">4</span><span class="step-text">Los demás filtros laterales (talle, color, precio) funcionan normalmente sobre el catálogo del CD.</span></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="scope-section">
+        <div class="scope-title">Fuera de scope — v1</div>
+        <div class="scope-list">
+          <div class="scope-item"><span class="scope-x">✕</span>Disponibilidad "mañana en tienda" (solo retiro en el día)</div>
+          <div class="scope-item"><span class="scope-x">✕</span>Stock en tiempo real por SKU/talle en PLP</div>
+          <div class="scope-item"><span class="scope-x">✕</span>Selector de tienda en el header global persistente</div>
+          <div class="scope-item"><span class="scope-x">✕</span>Mapa interactivo de tiendas</div>
+          <div class="scope-item"><span class="scope-x">✕</span>Buscador con contexto de seller/tienda (retorna siempre CD en v1)</div>
+          <div class="scope-item"><span class="scope-x">✕</span>Filtro de disponibilidad en PDP, CART y CHO (etapas siguientes del journey)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────────────────────────────
+         TAB: CRITERIOS
+    ───────────────────────────────────────────────────── -->
+    <div id="tab-criterios" class="tab-pane">
+      <p class="section-intro">Criterios de aceptación que debe cumplir la implementación para considerarse completa en esta etapa del journey.</p>
+      <div class="table-wrap">
+        <table class="req-table">
+          <thead>
+            <tr><th style="width:90px">ID</th><th>Criterio de aceptación</th><th style="width:220px">Condición esperada</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><span class="ac-id">AC-01</span></td><td>El filtro <strong>"Retiro Express"</strong> aparece en el panel lateral de la PLP</td><td>Siempre visible, lista de tiendas sin ninguna seleccionada por defecto</td></tr>
+            <tr><td><span class="ac-id">AC-02</span></td><td>Sin filtro activo, la PLP muestra el catálogo del <strong>CD (warehouse)</strong></td><td>Comportamiento idéntico al actual — el filtro no altera el estado por defecto</td></tr>
+            <tr><td><span class="ac-id">AC-03</span></td><td>Al seleccionar una tienda, el filtro se aplica inmediatamente</td><td>Sin recarga de página — actualización client-side por seller en VTEX Search</td></tr>
+            <tr><td><span class="ac-id">AC-04</span></td><td>El usuario puede seleccionar <strong>más de una tienda simultáneamente</strong></td><td>Los resultados son la unión del stock de todas las tiendas seleccionadas</td></tr>
+            <tr><td><span class="ac-id">AC-05</span></td><td>El conteo y título de la PLP se actualizan al cambiar la selección</td><td>Ej: "Air Force 1 · Retiro Express (13 resultados)"</td></tr>
+            <tr><td><span class="ac-id">AC-06</span></td><td>Solo las tiendas con cupo disponible en su PickupPoint aparecen <strong>habilitadas</strong></td><td>Las tiendas con cupo lleno se muestran visibles pero con checkbox deshabilitado</td></tr>
+            <tr><td><span class="ac-id">AC-07</span></td><td>Los filtros laterales (talle, color, precio) operan sobre el subset filtrado por seller</td><td>Coherentes con el stock de las tiendas seleccionadas</td></tr>
+            <tr><td><span class="ac-id">AC-08</span></td><td>La selección de tiendas persiste entre páginas y sesiones</td><td>localStorage o perfil del usuario logueado</td></tr>
+            <tr><td><span class="ac-id">AC-09</span></td><td>Deseleccionar todas las tiendas restaura el catálogo del CD</td><td>La PLP vuelve al comportamiento estándar sin modificar el estado de los checkboxes</td></tr>
+            <tr><td><span class="ac-id">AC-10</span></td><td>El estado del filtro no afecta la URL canónica de SEO</td><td>Filtro client-side — seller excluido del canonical tag</td></tr>
+            <tr><td><span class="ac-id">AC-11</span></td><td>En mobile, el panel Retiro Express es accesible y usable</td><td>Lista de tiendas scrolleable con checkboxes de tamaño táctil adecuado</td></tr>
+            <tr><td><span class="ac-id">AC-12</span></td><td>Se dispara un evento de tracking al activar o modificar el filtro</td><td>Evento <code>pickup_filter_activated</code> con array de tiendas + IDs → GA4</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────────────────────────────
+         TAB: COMPORTAMIENTO
+    ───────────────────────────────────────────────────── -->
+    <div id="tab-comportamiento" class="tab-pane">
+      <p class="section-intro">Escenarios edge que deben tener un comportamiento definido antes de iniciar el desarrollo.</p>
+      <div class="edge-grid">
+        <div class="edge-card">
+          <div><div class="edge-label edge-scenario-label">Escenario</div><div class="edge-text">La tienda seleccionada no tiene stock de <strong>ningún producto</strong> en esa categoría</div></div>
+          <div><div class="edge-label edge-response-label">Comportamiento esperado</div><div class="edge-text">Estado vacío con mensaje: <em>"No hay productos disponibles para retiro hoy en [Tienda]."</em> + CTA <strong>"Ver todos los productos"</strong> que desactiva el filtro.</div></div>
+        </div>
+        <div class="edge-card">
+          <div><div class="edge-label edge-scenario-label">Escenario</div><div class="edge-text">El usuario <strong>no da permisos de geolocalización</strong></div></div>
+          <div><div class="edge-label edge-response-label">Comportamiento esperado</div><div class="edge-text">El selector muestra <strong>búsqueda manual</strong> por nombre de tienda como fallback inmediato. El flujo no se bloquea.</div></div>
+        </div>
+        <div class="edge-card">
+          <div><div class="edge-label edge-scenario-label">Escenario</div><div class="edge-text">El usuario <strong>comparte la URL</strong> con el filtro de tienda activo</div></div>
+          <div><div class="edge-label edge-response-label">Comportamiento esperado</div><div class="edge-text">El receptor ve el <strong>catálogo completo sin filtro</strong>. La tienda no se persiste en la URL (privacidad + SEO).</div></div>
+        </div>
+        <div class="edge-card">
+          <div><div class="edge-label edge-scenario-label">Escenario</div><div class="edge-text">La tienda tiene <strong>stock parcial</strong>: algunos talles disponibles, otros no</div></div>
+          <div><div class="edge-label edge-response-label">Comportamiento esperado</div><div class="edge-text">El producto <strong>se muestra en PLP</strong>. La granularidad por talle se resuelve en la PDP (fuera de scope de esta etapa).</div></div>
+        </div>
+        <div class="edge-card">
+          <div><div class="edge-label edge-scenario-label">Escenario</div><div class="edge-text">El usuario aplica <strong>otros filtros</strong> y luego activa el toggle de retiro</div></div>
+          <div><div class="edge-label edge-response-label">Comportamiento esperado</div><div class="edge-text">Los filtros previos se <strong>mantienen activos</strong> y se intersectan con el filtro de tienda. El conteo refleja ambos.</div></div>
+        </div>
+        <div class="edge-card">
+          <div><div class="edge-label edge-scenario-label">Escenario</div><div class="edge-text">Una tienda persistida en localStorage <strong>ya no existe</strong> o fue desactivada en VTEX</div></div>
+          <div><div class="edge-label edge-response-label">Comportamiento esperado</div><div class="edge-text">La tienda se elimina silenciosamente de la selección guardada. Los demás checkboxes se respetan. La PLP no muestra error.</div></div>
+        </div>
+        <div class="edge-card">
+          <div><div class="edge-label edge-scenario-label">Escenario</div><div class="edge-text"><strong>Todas las tiendas</strong> tienen cupo lleno en ese momento</div></div>
+          <div><div class="edge-label edge-response-label">Comportamiento esperado</div><div class="edge-text">El panel Retiro Express muestra todas las tiendas con checkbox deshabilitado. Se puede mostrar un mensaje contextual: <em>"No hay disponibilidad de retiro hoy. Volvé a intentarlo más tarde."</em></div></div>
+        </div>
+        <div class="edge-card">
+          <div><div class="edge-label edge-scenario-label">Escenario</div><div class="edge-text">El usuario usa el <strong>buscador</strong> mientras tiene tiendas seleccionadas en Retiro Express</div></div>
+          <div><div class="edge-label edge-response-label">Comportamiento esperado</div><div class="edge-text">El buscador retorna siempre stock del <strong>CD (warehouse)</strong>, ignorando el contexto de seller. <strong>⚠ Pendiente confirmar</strong> si esto es el comportamiento deseado o si debería respetar los sellers activos.</div></div>
+        </div>
+        <div class="edge-card">
+          <div><div class="edge-label edge-scenario-label">Escenario</div><div class="edge-text">El usuario selecciona <strong>múltiples tiendas</strong> con distintos stocks del mismo producto</div></div>
+          <div><div class="edge-label edge-response-label">Comportamiento esperado</div><div class="edge-text">El producto aparece en PLP si al menos una de las tiendas seleccionadas tiene stock. La granularidad por tienda individual se resuelve en la PDP.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────────────────────────────
+         TAB: PREGUNTAS
+    ───────────────────────────────────────────────────── -->
+    <div id="tab-preguntas" class="tab-pane">
+      <p class="section-intro">Preguntas a resolver antes de iniciar el desarrollo. Las confirmadas tienen respuesta; las pendientes requieren validación técnica o con la marca.</p>
+      <div class="questions-grid">
+
+        <div class="question-card">
+          <div class="q-idx">1</div>
+          <div class="q-body">
+            <div class="q-text">¿La disponibilidad de stock por tienda ya está indexada en VTEX Search, o requiere un servicio separado?</div>
+            <div class="q-answer empty">Sin respuesta aún — depende de si pickup-service-nikar expone inventario por tienda o solo lista los puntos de retiro.</div>
+            <span class="q-badge q-tech">🔧 A confirmar — técnico</span>
+          </div>
+        </div>
+
+        <div class="question-card">
+          <div class="q-idx">2</div>
+          <div class="q-body">
+            <div class="q-text">¿El <code>pickup-service-nikar</code> expone disponibilidad de stock por producto, o solo lista los puntos de pickup activos?</div>
+            <div class="q-answer empty">Sin respuesta aún — revisar endpoint <code>GET /_v/private/pickup-service/pickup-points</code> y su payload.</div>
+            <span class="q-badge q-tech">🔧 A confirmar — técnico</span>
+          </div>
+        </div>
+
+        <div class="question-card">
+          <div class="q-idx">3</div>
+          <div class="q-body">
+            <div class="q-text">¿Cuántas tiendas físicas tiene Nike AR actualmente?</div>
+            <div class="q-answer">Nike Argentina opera <strong>17 tiendas físicas</strong>. Esto define la escala del selector (lista scrolleable vs. búsqueda con input).</div>
+            <span class="q-badge q-confirmed">✓ Confirmado</span>
+          </div>
+        </div>
+
+        <div class="question-card">
+          <div class="q-idx">4</div>
+          <div class="q-body">
+            <div class="q-text">¿El "retiro en el día" tiene un horario de corte? ¿Hay restricciones por feriados o días de la semana?</div>
+            <div class="q-answer empty">A confirmar con la marca — impacta en si el toggle debe desactivarse automáticamente después de cierta hora y cómo se comunica.</div>
+            <span class="q-badge q-brand">⚡ A confirmar con la marca</span>
+          </div>
+        </div>
+
+        <div class="question-card">
+          <div class="q-idx">5</div>
+          <div class="q-body">
+            <div class="q-text">¿El retiro aplica solo a tiendas propias Nike AR o también a dealers y tiendas multimarca?</div>
+            <div class="q-answer empty">A confirmar con la marca — define el alcance del selector y qué puntos de entrega se muestran al usuario.</div>
+            <span class="q-badge q-brand">⚡ A confirmar con la marca</span>
+          </div>
+        </div>
+
+        <div class="question-card">
+          <div class="q-idx">6</div>
+          <div class="q-body">
+            <div class="q-text">¿Cuál es el tiempo de preparación del pedido una vez confirmada la compra con retiro en tienda?</div>
+            <div class="q-answer empty">A confirmar con la marca — "retiro en el día" es una promesa logística concreta que debe comunicarse en PDP y checkout.</div>
+            <span class="q-badge q-brand">⚡ A confirmar con la marca</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══ PDP / CART / CHO ══════════════════════════════════════ -->
+<section id="section-pdp" class="page-section">
+  <div class="main">
+
+    <div class="objective-card">
+      <div class="objective-tag">Objetivo — PDP</div>
+      <div class="objective-title">Disponibilidad por talle y selección de método de entrega en la ficha de producto</div>
+      <div class="objective-desc">
+        En la PDP, el usuario elige el talle y ve en tiempo real la disponibilidad de ese talle para retiro en tienda o envío desde warehouse. La lógica de fulfillment determina qué botones CTA se muestran y qué opciones de entrega están disponibles según el origen del stock.
+      </div>
+      <div class="objective-meta">
+        <div class="meta-item"><div class="meta-label">Proyecto</div><div class="meta-value">BOPIS — Buy Online, Pick Up In Store</div></div>
+        <div class="meta-item"><div class="meta-label">Plataforma</div><div class="meta-value">VTEX IO — nikear.store-components</div></div>
+        <div class="meta-item"><div class="meta-label">Escenarios</div><div class="meta-value">Solo tienda · Tienda + WH</div></div>
+        <div class="meta-item"><div class="meta-label">Estado</div><div class="meta-value">En definición</div></div>
+      </div>
+    </div>
+
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="switchTab(this,'pdp-demo')">Demo visual</button>
+      <button class="tab-btn" onclick="switchTab(this,'pdp-flujos')">Flujos a cubrir</button>
+      <button class="tab-btn" onclick="switchTab(this,'pdp-criterios')">Criterios de aceptación</button>
+      <button class="tab-btn" onclick="switchTab(this,'pdp-comportamiento')">Comportamiento edge</button>
+      <button class="tab-btn" onclick="switchTab(this,'pdp-preguntas')">Preguntas abiertas</button>
+    </div>
+
+    <!-- ── TAB: DEMO ──────────────────────────────────────── -->
+    <div id="tab-pdp-demo" class="tab-pane active">
+      <div class="demo-container">
+        <div class="demo-legend">
+          <p class="demo-legend-text">Dos escenarios según el origen del stock. Cambiá la solapa para ver cómo varía la PDP.</p>
+          <div class="demo-controls">
+            <span id="pdpStateBadge" class="demo-state-badge state-default">Solo stock en tienda</span>
+          </div>
+        </div>
+
+        <!-- Scenario tab switcher (encima del browser frame) -->
+        <div class="pdp-scenario-tabs">
+          <button class="pdp-scenario-tab active" onclick="switchPdpScenario('store-only', this)">
+            📍 Solo retiro en tienda Nike
+            <span class="stab-tag stab-tag-store">Solo tienda</span>
+          </button>
+          <button class="pdp-scenario-tab" onclick="switchPdpScenario('store-wh', this)">
+            🚚 Envío a domicilio + Retiro
+            <span class="stab-tag stab-tag-both">Tienda + WH</span>
+          </button>
+        </div>
+
+        <!-- Browser frame -->
+        <div class="browser-frame" style="border-radius:0 0 10px 10px;">
+          <div class="browser-bar">
+            <div class="browser-dots">
+              <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+            </div>
+            <div class="browser-url-bar">
+              <span class="url-lock">🔒</span>
+              <span>nike.com.ar/air-force-1/air-force-1-07-FZ7866-100</span>
+            </div>
+          </div>
+          <div class="nike-header">
+            <div class="nike-logo">NIKE</div>
+            <div class="nike-nav"><span>Hombres</span><span>Mujeres</span><span>Kids</span><span>Jordan</span><span>Sale</span></div>
+            <div class="nike-actions"><span>🔍</span><span>♡</span><span>👤</span></div>
+          </div>
+
+          <!-- ── Escenario 1: Solo tienda ─────────────────── -->
+          <div id="pdp-scenario-store-only" class="pdp-scenario active">
+            <div class="pdp-context-banner banner-store">
+              📍 &nbsp;Solo con stock en tienda Nike — envío a domicilio no disponible
+            </div>
+            <div class="pdp-layout">
+              <div class="pdp-img-col">
+                <svg viewBox="0 0 200 140" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:320px">
+                  <ellipse cx="100" cy="128" rx="88" ry="10" fill="#e0e0e0"/>
+                  <path d="M 20 112 Q 26 70 75 60 Q 118 52 172 76 Q 188 88 188 112 Z" fill="#f0f0f0" stroke="#e0e0e0" stroke-width="1.5"/>
+                  <path d="M 20 112 Q 18 120 22 122 L 180 122 Q 186 120 188 112 Z" fill="#e8e8e8" stroke="#ddd" stroke-width="1"/>
+                  <path d="M 68 59 L 77 28 Q 82 20 88 28 L 84 59" fill="#efefef" stroke="#e0e0e0" stroke-width="1"/>
+                  <line x1="70" y1="50" x2="84" y2="49" stroke="#d8d8d8" stroke-width="1.5" stroke-linecap="round"/>
+                  <line x1="70" y1="41" x2="84" y2="40" stroke="#d8d8d8" stroke-width="1.5" stroke-linecap="round"/>
+                  <line x1="71" y1="32" x2="84" y2="31" stroke="#d8d8d8" stroke-width="1.5" stroke-linecap="round"/>
+                  <path d="M 82 100 Q 115 82 178 93" stroke="#c8c8c8" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <div class="pdp-info-col">
+                <div class="pdp-cat-tag">Calzado para Hombre</div>
+                <div class="pdp-name">Air Force 1 '07</div>
+                <div class="pdp-colors">1 Color · Blanco/Blanco</div>
+                <div class="pdp-price">$115.000</div>
+                <div class="pdp-cuotas">Hasta 6x $ 19.167 sin interés</div>
+                <div class="pdp-impuesto">Precio sin impuestos nacionales $ 94.828</div>
+                <div class="pdp-size-header">
+                  <span class="pdp-size-label">Seleccionar Talle</span>
+                  <span class="pdp-size-guide">Guía de talles</span>
+                </div>
+                <div class="pdp-size-grid pdp-size-grid-5">
+                  <div class="pdp-size-btn unavailable">40</div>
+                  <div class="pdp-size-btn" onclick="pdpSelectSize(this,'store-only')">41</div>
+                  <div class="pdp-size-btn" onclick="pdpSelectSize(this,'store-only')">42</div>
+                  <div class="pdp-size-btn selected" onclick="pdpSelectSize(this,'store-only')">43</div>
+                  <div class="pdp-size-btn" onclick="pdpSelectSize(this,'store-only')">44</div>
+                  <div class="pdp-size-btn unavailable">44.5</div>
+                  <div class="pdp-size-btn" onclick="pdpSelectSize(this,'store-only')">45</div>
+                  <div class="pdp-size-btn unavailable">46</div>
+                  <div class="pdp-size-btn" onclick="pdpSelectSize(this,'store-only')">47</div>
+                  <div class="pdp-size-btn unavailable">47.5</div>
+                </div>
+                <div class="pdp-cta-block">
+                  <button class="pdp-btn-primary" onclick="openPdpModal('store-only')">Selecciona sucursal de retiro</button>
+                  <button class="pdp-btn-secondary">Favoritos &nbsp;♡</button>
+                </div>
+                <div class="pdp-fulfillment">
+                  <div class="pdp-f-item pdp-no-ship">
+                    <div class="pdp-f-label">Envío a domicilio</div>
+                    <div class="pdp-no-ship-msg">Opción no disponible. (Solo retiro en tienda)</div>
+                  </div>
+                  <div class="pdp-f-item">
+                    <div class="pdp-f-label">Retiro en tienda gratis</div>
+                    <div class="pdp-f-value">
+                      <button class="pdp-f-link" onclick="openPdpModal('store-only')">Buscar tienda</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Escenario 2: Tienda + WH ───────────────── -->
+          <div id="pdp-scenario-store-wh" class="pdp-scenario">
+            <div class="pdp-context-banner banner-both">
+              ✓ &nbsp;Con stock en tienda Nike y warehouse NDDC — todas las opciones de entrega disponibles
+            </div>
+            <div class="pdp-layout">
+              <div class="pdp-img-col">
+                <svg viewBox="0 0 200 240" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:260px">
+                  <ellipse cx="100" cy="228" rx="72" ry="8" fill="#e0e0e0"/>
+                  <path d="M 52 60 L 28 100 L 52 108 L 52 220 L 148 220 L 148 108 L 172 100 L 148 60 Q 136 48 120 44 L 120 56 Q 100 64 80 56 L 80 44 Q 64 48 52 60 Z" fill="#222222" stroke="#111" stroke-width="1.5"/>
+                  <path d="M 80 56 Q 100 80 120 56" fill="none" stroke="#888" stroke-width="2"/>
+                  <path d="M 52 108 L 52 220 L 62 220 L 62 112 Z" fill="#ffffff" opacity="0.12"/>
+                  <path d="M 148 108 L 148 220 L 138 220 L 138 112 Z" fill="#ffffff" opacity="0.12"/>
+                  <path d="M 118 90 Q 128 85 122 95 Q 116 105 108 100 Q 102 96 118 90 Z" fill="#ffffff" opacity="0.7"/>
+                  <text x="100" y="165" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="44" font-weight="900" fill="#ffffff" opacity="0.9">1</text>
+                  <text x="100" y="138" text-anchor="middle" font-family="Arial Black,sans-serif" font-size="13" font-weight="900" fill="#ffffff" letter-spacing="3" opacity="0.9">SPURS</text>
+                  <rect x="82" y="200" width="36" height="14" rx="2" fill="#444"/>
+                </svg>
+              </div>
+              <div class="pdp-info-col">
+                <div class="pdp-cat-tag">Musculosa de Básquet para Hombre</div>
+                <div class="pdp-name">San Antonio Spurs Icon Edition 2022/23</div>
+                <div class="pdp-colors">1 Color · Negro/Blanco</div>
+                <div class="pdp-price">$179.999</div>
+                <div class="pdp-cuotas">Hasta 6x $ 30.000 sin interés</div>
+                <div class="pdp-impuesto">Precio sin impuestos nacionales $ 148.760</div>
+                <div class="pdp-size-header">
+                  <span class="pdp-size-label">Seleccionar Talle</span>
+                  <span class="pdp-size-guide">Guía de talles</span>
+                </div>
+                <div class="pdp-size-grid">
+                  <div class="pdp-size-btn" onclick="pdpSelectSize(this)">S</div>
+                  <div class="pdp-size-btn" onclick="pdpSelectSize(this)">M</div>
+                  <div class="pdp-size-btn selected" onclick="pdpSelectSize(this)">L</div>
+                  <div class="pdp-size-btn" onclick="pdpSelectSize(this)">XL</div>
+                  <div class="pdp-size-btn" onclick="pdpSelectSize(this)">2XL</div>
+                </div>
+                <div class="pdp-cta-block">
+                  <button class="pdp-btn-primary">Agregar al Carrito</button>
+                  <button class="pdp-btn-secondary">Favoritos &nbsp;♡</button>
+                </div>
+                <div class="pdp-fulfillment">
+                  <div class="pdp-f-item">
+                    <div class="pdp-f-label">Envío a domicilio</div>
+                    <div class="pdp-f-value">Verás nuestras opciones de envío al finalizar la compra.</div>
+                  </div>
+                  <div class="pdp-f-item">
+                    <div class="pdp-f-label">Retiro en tienda gratis</div>
+                    <div class="pdp-f-value">
+                      <button class="pdp-f-link" onclick="openPdpModal('store-wh')">Buscar tienda</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /browser-frame -->
+      </div><!-- /demo-container -->
+    </div><!-- /tab-pdp-demo -->
+
+    <!-- ── TAB: FLUJOS ─────────────────────────────────────── -->
+    <div id="tab-pdp-flujos" class="tab-pane">
+      <p class="section-intro">Cuatro flujos según el origen del stock y la tienda seleccionada por el usuario.</p>
+      <div class="flow-grid">
+
+        <div class="flow-card open">
+          <div class="flow-card-header" onclick="toggleFlow(this)">
+            <div class="flow-num">1</div>
+            <div class="flow-header-text">
+              <div class="flow-title">Producto solo en tienda — usuario sin tienda seleccionada</div>
+              <div class="flow-subtitle">Primera visita a la PDP · no viene de la PLP filtrada</div>
+            </div>
+            <span class="flow-chevron">▾</span>
+          </div>
+          <div class="flow-body">
+            <div class="flow-steps">
+              <div class="flow-step"><span class="step-circle">1</span><span class="step-text">Usuario llega a la PDP. Ve el selector de talle y el botón <strong>"Selecciona sucursal de retiro"</strong>. El disclaimer <strong>"Envío a domicilio no disponible"</strong> es visible.</span></div>
+              <div class="flow-step"><span class="step-circle">2</span><span class="step-text">Usuario selecciona un talle. Al hacer clic en el botón o en <strong>"Buscar tienda"</strong>, se abre el selector de sucursal mostrando tiendas con stock de ese talle.</span></div>
+              <div class="flow-step"><span class="step-circle">3</span><span class="step-text">Usuario selecciona una tienda. El modal se cierra y el CTA cambia a <strong>"Retirar en [Tienda]"</strong>.</span></div>
+              <div class="flow-step"><span class="step-circle">4</span><span class="step-text">Usuario hace clic en el CTA → producto se agrega al carrito con método de entrega <strong>pickup en la tienda seleccionada</strong>.</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-card">
+          <div class="flow-card-header" onclick="toggleFlow(this)">
+            <div class="flow-num">2</div>
+            <div class="flow-header-text">
+              <div class="flow-title">Producto solo en tienda — usuario viene de la PLP filtrada</div>
+              <div class="flow-subtitle">La tienda ya está seleccionada desde el filtro "Retirar hoy" en PLP</div>
+            </div>
+            <span class="flow-chevron">▾</span>
+          </div>
+          <div class="flow-body">
+            <div class="flow-steps">
+              <div class="flow-step"><span class="step-circle">1</span><span class="step-text">Usuario llega a la PDP desde la PLP con el filtro activo en <strong>Nike Palermo</strong>. La tienda está preseleccionada en la PDP.</span></div>
+              <div class="flow-step"><span class="step-circle">2</span><span class="step-text">El CTA muestra directamente <strong>"Retirar en Nike Palermo"</strong> sin requerir nueva selección de tienda.</span></div>
+              <div class="flow-step"><span class="step-circle">3</span><span class="step-text">Si el talle elegido <strong>no tiene stock</strong> en la tienda preseleccionada, el botón indica <strong>"Sin stock en Nike Palermo"</strong> con link <em>"Buscar en otra tienda"</em>.</span></div>
+              <div class="flow-step"><span class="step-circle">4</span><span class="step-text">Usuario confirma el talle y la tienda → agrega al carrito con pickup en Nike Palermo.</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-card">
+          <div class="flow-card-header" onclick="toggleFlow(this)">
+            <div class="flow-num">3</div>
+            <div class="flow-header-text">
+              <div class="flow-title">Producto con tienda + WH — elige retiro en tienda (mismo día)</div>
+              <div class="flow-subtitle">Ambas fuentes disponibles · usuario prioriza retiro inmediato</div>
+            </div>
+            <span class="flow-chevron">▾</span>
+          </div>
+          <div class="flow-body">
+            <div class="flow-steps">
+              <div class="flow-step"><span class="step-circle">1</span><span class="step-text">Usuario ve las opciones inline: <strong>Nike Palermo (Retiro hoy)</strong> y <strong>Punto de retiro NDDC (Retiro en 3 días)</strong>.</span></div>
+              <div class="flow-step"><span class="step-circle">2</span><span class="step-text">El CTA principal es <strong>"Agregar a la bolsa de compra"</strong> porque hay stock garantizado en WH.</span></div>
+              <div class="flow-step"><span class="step-circle">3</span><span class="step-text">Usuario puede hacer clic en <strong>"Cambiar ubicación"</strong> para ver todas las tiendas con stock del talle seleccionado.</span></div>
+              <div class="flow-step"><span class="step-circle">4</span><span class="step-text">Usuario elige <strong>Nike Palermo</strong>. El carrito registra el item con fulfillment <strong>pickup en tienda</strong>. El envío a domicilio sigue disponible como alternativa en checkout.</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-card">
+          <div class="flow-card-header" onclick="toggleFlow(this)">
+            <div class="flow-num">4</div>
+            <div class="flow-header-text">
+              <div class="flow-title">Producto con tienda + WH — elige punto de retiro NDDC (3 días)</div>
+              <div class="flow-subtitle">Usuario no puede retirar hoy · elige despacho desde warehouse</div>
+            </div>
+            <span class="flow-chevron">▾</span>
+          </div>
+          <div class="flow-body">
+            <div class="flow-steps">
+              <div class="flow-step"><span class="step-circle">1</span><span class="step-text">Usuario ve las dos opciones y selecciona la fila <strong>Punto de retiro NDDC</strong>. La selección se marca visualmente.</span></div>
+              <div class="flow-step"><span class="step-circle">2</span><span class="step-text">El sistema registra que el fulfillment será <strong>despacho desde WH a punto de retiro</strong>, no desde tienda Nike.</span></div>
+              <div class="flow-step"><span class="step-circle">3</span><span class="step-text">Usuario hace clic en <strong>"Agregar a la bolsa"</strong>. El carrito refleja el método elegido (NDDC) con el tiempo estimado.</span></div>
+              <div class="flow-step"><span class="step-circle">4</span><span class="step-text">En el checkout se confirma el <strong>punto de retiro específico</strong> y el plazo de preparación.</span></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="scope-section">
+        <div class="scope-title">Fuera de scope — v1 PDP</div>
+        <div class="scope-list">
+          <div class="scope-item"><span class="scope-x">✕</span>Indicador de "último talle disponible" en tienda</div>
+          <div class="scope-item"><span class="scope-x">✕</span>Reserva de talle sin confirmar la compra</div>
+          <div class="scope-item"><span class="scope-x">✕</span>Notificación de stock cuando el talle vuelve a estar disponible</div>
+          <div class="scope-item"><span class="scope-x">✕</span>Mapa interactivo de tiendas en PDP</div>
+          <div class="scope-item"><span class="scope-x">✕</span>Disponibilidad en tiendas fuera del radio de geolocalización del usuario</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB: CRITERIOS ──────────────────────────────────── -->
+    <div id="tab-pdp-criterios" class="tab-pane">
+      <p class="section-intro">Criterios de aceptación específicos de la PDP para el flujo BOPIS.</p>
+      <div class="table-wrap">
+        <table class="req-table">
+          <thead>
+            <tr><th style="width:105px">ID</th><th>Criterio de aceptación</th><th style="width:260px">Condición esperada</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><span class="ac-id">PDP-01</span></td><td>El botón CTA refleja la modalidad de fulfillment disponible según el origen del stock</td><td>Solo tienda → <strong>"Selecciona sucursal de retiro"</strong> / Tienda + WH → <strong>"Agregar a la bolsa"</strong></td></tr>
+            <tr><td><span class="ac-id">PDP-02</span></td><td>El disclaimer de envío no disponible aparece exclusivamente en productos sin stock en WH</td><td>Box con borde rojo + texto <em>"Opción no disponible. Solo retiro en tienda"</em></td></tr>
+            <tr><td><span class="ac-id">PDP-03</span></td><td>Las opciones de retiro inline muestran disponibilidad diferenciada por método</td><td><em>"Retiro hoy"</em> (verde) para tienda con stock / <em>"Retiro en X días"</em> (ámbar) para NDDC</td></tr>
+            <tr><td><span class="ac-id">PDP-04</span></td><td>Al cambiar el talle, el sistema actualiza la disponibilidad en las opciones de retiro</td><td>Si el talle no tiene stock en la tienda preseleccionada, el CTA cambia a <em>"Sin stock en esta tienda"</em></td></tr>
+            <tr><td><span class="ac-id">PDP-05</span></td><td>La tienda seleccionada en PLP persiste al llegar a la PDP</td><td>La tienda del localStorage se usa como tienda preferida sin requerir nueva selección</td></tr>
+            <tr><td><span class="ac-id">PDP-06</span></td><td>El modal de selección de tienda filtra por disponibilidad del talle elegido</td><td>Solo se muestran tiendas con stock del talle seleccionado. Tiendas sin ese talle se muestran deshabilitadas</td></tr>
+            <tr><td><span class="ac-id">PDP-07</span></td><td>El usuario puede cambiar la tienda de retiro desde la PDP sin perder el talle seleccionado</td><td><em>"Cambiar ubicación"</em> / <em>"Buscar tienda"</em> abre modal sin resetear la selección de talle</td></tr>
+            <tr><td><span class="ac-id">PDP-08</span></td><td>El Punto de retiro NDDC solo aparece cuando el WH tiene stock de ese talle</td><td>Si el WH no tiene stock, la opción NDDC no se renderiza. El CTA solo expone el flujo de tienda</td></tr>
+            <tr><td><span class="ac-id">PDP-09</span></td><td>En mobile, el selector de tienda es un bottom sheet usable</td><td>Modal full-screen en dispositivos móviles con scroll nativo de la lista de tiendas</td></tr>
+            <tr><td><span class="ac-id">PDP-10</span></td><td>Se dispara evento de tracking al seleccionar el método de retiro</td><td>Evento <code>pdp_pickup_method_selected</code> con talle, tienda o NDDC → GA4</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── TAB: COMPORTAMIENTO EDGE ────────────────────────── -->
+    <div id="tab-pdp-comportamiento" class="tab-pane">
+      <p class="section-intro">Casos edge que requieren comportamiento definido antes del desarrollo.</p>
+      <div class="edge-grid">
+        <div class="edge-card">
+          <div><div class="edge-label edge-scenario-label">Escenario</div><div class="edge-text">El talle seleccionado <strong>no tiene stock en la tienda persistida</strong> desde la PLP</div></div>
+          <div><div class="edge-label edge-response-label">Comportamiento esperado</div><div class="edge-text">El CTA cambia a <strong>"Sin stock en [Tienda] para talle X"</strong> con link <em>"Buscar en otra tienda"</em> que abre el selector con las tiendas que sí tienen ese talle.</div></div>
+        </div>
+        <div class="edge-card">
+          <div><div class="edge-label edge-scenario-label">Escenario</div><div class="edge-text">El producto <strong>no tiene stock en ninguna tienda ni en WH</strong> para el talle elegido</div></div>
+          <div><div class="edge-label edge-response-label">Comportamiento esperado</div><div class="edge-text">El talle se muestra tachado/deshabilitado en el selector. Si ya estaba seleccionado, los CTAs se deshabilitan con el mensaje <em>"Sin stock disponible para este talle"</em>.</div></div>
+        </div>
+        <div class="edge-card">
+          <div><div class="edge-label edge-scenario-label">Escenario</div><div class="edge-text">El usuario llega a la PDP <strong>directamente por URL</strong> (Google, share) sin pasar por PLP</div></div>
+          <div><div class="edge-label edge-response-label">Comportamiento esperado</div><div class="edge-text">Si tiene tienda en localStorage, se usa como preferida. Si no tiene, el flujo de selección de tienda se inicia al hacer clic en el CTA, igual que en PLP sin tienda seleccionada.</div></div>
+        </div>
+        <div class="edge-card">
+          <div><div class="edge-label edge-scenario-label">Escenario</div><div class="edge-text">El usuario <strong>cambia el talle después de haber seleccionado una tienda</strong> de retiro</div></div>
+          <div><div class="edge-label edge-response-label">Comportamiento esperado</div><div class="edge-text">La disponibilidad se recalcula para el nuevo talle en la tienda previamente elegida. Si hay stock: todo OK. Si no: el CTA indica falta de stock con la opción de buscar otra tienda.</div></div>
+        </div>
+        <div class="edge-card">
+          <div><div class="edge-label edge-scenario-label">Escenario</div><div class="edge-text">El producto tiene stock en tienda pero el WH <strong>no tiene stock del talle</strong></div></div>
+          <div><div class="edge-label edge-response-label">Comportamiento esperado</div><div class="edge-text">Solo se muestran las opciones de retiro en tienda. El <em>"Punto de retiro NDDC"</em> no aparece. El envío a domicilio desde WH también se deshabilita para ese talle específico.</div></div>
+        </div>
+        <div class="edge-card">
+          <div><div class="edge-label edge-scenario-label">Escenario</div><div class="edge-text">El usuario <strong>vuelve a la PDP</strong> del mismo producto después de haberlo agregado al carrito</div></div>
+          <div><div class="edge-label edge-response-label">Comportamiento esperado</div><div class="edge-text">La PDP se muestra en estado normal sin indicar que el producto ya está en el carrito. La tienda y el talle previos se recuerdan para facilitar una nueva acción.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB: PREGUNTAS ──────────────────────────────────── -->
+    <div id="tab-pdp-preguntas" class="tab-pane">
+      <p class="section-intro">Preguntas que deben resolverse antes de iniciar el desarrollo de la PDP.</p>
+      <div class="questions-grid">
+
+        <div class="question-card">
+          <div class="q-idx">1</div>
+          <div class="q-body">
+            <div class="q-text">¿El botón CTA cambia dinámicamente al seleccionar el talle, o es estático hasta que el usuario interactúa?</div>
+            <div class="q-answer empty">A definir — impacta en si el stock por talle se consulta de manera eager (al cargar la PDP) o lazy (al seleccionar el talle). El enfoque lazy reduce llamadas a la API.</div>
+            <span class="q-badge q-tech">🔧 A confirmar — técnico</span>
+          </div>
+        </div>
+
+        <div class="question-card">
+          <div class="q-idx">2</div>
+          <div class="q-body">
+            <div class="q-text">¿Cómo diferencia VTEX si un producto tiene stock solo en tienda vs. también en WH? ¿Es por campo de seller o por lógica de fulfillment?</div>
+            <div class="q-answer empty">A confirmar con el equipo técnico — define cómo la PDP detecta el origen del stock para mostrar los CTAs correctos y las opciones inline.</div>
+            <span class="q-badge q-tech">🔧 A confirmar — técnico</span>
+          </div>
+        </div>
+
+        <div class="question-card">
+          <div class="q-idx">3</div>
+          <div class="q-body">
+            <div class="q-text">¿El "Retiro hoy" tiene horario de corte? ¿Cómo se comporta la PDP después de ese horario?</div>
+            <div class="q-answer empty">A confirmar con la marca — si hay corte, la PDP debe ocultar "Retiro hoy" y mostrar "Retiro mañana" o simplemente desactivar la opción de tienda después de cierta hora.</div>
+            <span class="q-badge q-brand">⚡ A confirmar con la marca</span>
+          </div>
+        </div>
+
+        <div class="question-card">
+          <div class="q-idx">4</div>
+          <div class="q-body">
+            <div class="q-text">¿El "Punto de retiro NDDC" es siempre el mismo para todos los usuarios, o varía por zona geográfica?</div>
+            <div class="q-answer empty">A confirmar — si varía por zona, la PDP necesita geolocalización para mostrar el punto correcto. Si es único, la implementación es significativamente más simple.</div>
+            <span class="q-badge q-brand">⚡ A confirmar con la marca</span>
+          </div>
+        </div>
+
+        <div class="question-card">
+          <div class="q-idx">5</div>
+          <div class="q-body">
+            <div class="q-text">¿El plazo "Retiro en 3 días" del NDDC es fijo o dinámico según la zona y el día de la semana?</div>
+            <div class="q-answer empty">A confirmar — un valor dinámico requiere integración con el servicio de logística en tiempo real. Un valor fijo es más simple pero menos preciso para el usuario.</div>
+            <span class="q-badge q-brand">⚡ A confirmar con la marca</span>
+          </div>
+        </div>
+
+        <div class="question-card">
+          <div class="q-idx">6</div>
+          <div class="q-body">
+            <div class="q-text">¿El usuario puede agregar al carrito sin elegir el método de retiro en PDP, o es obligatorio antes de continuar?</div>
+            <div class="q-answer empty">A definir como decisión de producto — si es obligatorio en PDP, el CTA se bloquea hasta elegir. Si no, la selección se puede diferir al checkout (más cercano al flujo actual).</div>
+            <span class="q-badge q-pending">⏳ Pendiente de decisión</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section id="section-cart" class="page-section">
+  <div class="main">
+    <div class="coming-soon">
+      <div class="coming-soon-icon">🛒</div>
+      <div class="coming-soon-title">CART — Próximamente</div>
+      <div class="coming-soon-desc">Resumen de método de entrega por item, cambio de tienda desde el carrito.</div>
+    </div>
+  </div>
+</section>
+
+<section id="section-checkout" class="page-section">
+  <div class="main">
+
+    <div class="objective-card">
+      <div class="objective-tag">Objetivo — CHO</div>
+      <div class="objective-title">Confirmación de método de entrega y gestión de splits en el flujo de pago</div>
+      <div class="objective-desc">
+        El checkout debe presentar claramente todos los carriles de entrega que resultan de la composición del carrito. Retiro en tienda, punto de retiro NDDC y envío a domicilio pueden coexistir en un mismo pedido según el origen del stock de cada producto. Cada combinación genera un comportamiento distinto que debe estar definido antes del desarrollo.
+      </div>
+      <div class="objective-meta">
+        <div class="meta-item"><div class="meta-label">Proyecto</div><div class="meta-value">BOPIS — Buy Online, Pick Up In Store</div></div>
+        <div class="meta-item"><div class="meta-label">Plataforma</div><div class="meta-value">VTEX IO — checkout</div></div>
+        <div class="meta-item"><div class="meta-label">Casos documentados</div><div class="meta-value">15 escenarios en 5 grupos</div></div>
+        <div class="meta-item"><div class="meta-label">Estado</div><div class="meta-value">En definición</div></div>
+      </div>
+    </div>
+
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="switchTab(this,'cho-matriz')">Matriz de casos</button>
+      <button class="tab-btn" onclick="switchTab(this,'cho-criterios')">Criterios de aceptación</button>
+      <button class="tab-btn" onclick="switchTab(this,'cho-preguntas')">Preguntas abiertas</button>
+    </div>
+
+    <!-- ── TAB: MATRIZ ─────────────────────────────────────── -->
+    <div id="tab-cho-matriz" class="tab-pane active">
+
+      <!-- Leyenda -->
+      <div class="matrix-legend">
+        <div class="matrix-legend-group">
+          <span class="matrix-legend-label">Origen</span>
+          <span class="origin-pill op-store">🏪 Tienda</span>
+          <span class="origin-pill op-wh">📦 WH / CD</span>
+          <span class="origin-pill op-both">🔀 Tienda + WH</span>
+        </div>
+        <div class="matrix-legend-sep"></div>
+        <div class="matrix-legend-group">
+          <span class="matrix-legend-label">Split</span>
+          <span class="split-badge sb-no">Sin split</span>
+          <span class="split-badge sb-2m">2 métodos</span>
+          <span class="split-badge sb-2t">2 tiendas</span>
+          <span class="split-badge sb-diff">Diferido</span>
+          <span class="split-badge sb-trip">Triple</span>
+        </div>
+        <div class="matrix-legend-sep"></div>
+        <div class="matrix-legend-group">
+          <span class="matrix-legend-label">Complejidad</span>
+          <span class="complexity-badge cb-low">Baja</span>
+          <span class="complexity-badge cb-mid">Media</span>
+          <span class="complexity-badge cb-high">Alta</span>
+        </div>
+      </div>
+
+      <div class="matrix-wrap">
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <th style="width:80px">ID</th>
+              <th style="width:126px">Origen · Prod. A</th>
+              <th style="width:126px">Origen · Prod. B</th>
+              <th style="width:168px">Entrega elegida</th>
+              <th style="width:100px">Split</th>
+              <th>Comportamiento en CHO</th>
+              <th style="width:72px">Compl.</th>
+            </tr>
+          </thead>
+          <tbody>
+
+            <!-- GRUPO 1 -->
+            <tr class="matrix-group-row"><td colspan="7">Grupo 1 — Cart de 1 producto (baseline sin split)</td></tr>
+            <tr>
+              <td><span class="ac-id">CHO-01</span></td>
+              <td><span class="origin-pill op-store">🏪 Unicenter</span></td>
+              <td><span class="matrix-empty">—</span></td>
+              <td><span class="delivery-pill dp-pickup">Retiro en tienda</span></td>
+              <td><span class="split-badge sb-no">Sin split</span></td>
+              <td>Confirmación de retiro en Unicenter con estimado <strong class="matrix-strong">"disponible hoy"</strong>. Código QR al confirmar el pago. Referencia: flujo más simple.</td>
+              <td><span class="complexity-badge cb-low">Baja</span></td>
+            </tr>
+            <tr>
+              <td><span class="ac-id">CHO-02</span></td>
+              <td><span class="origin-pill op-wh">📦 WH / CD</span></td>
+              <td><span class="matrix-empty">—</span></td>
+              <td><span class="delivery-pill dp-shipping">Envío a domicilio</span></td>
+              <td><span class="split-badge sb-no">Sin split</span></td>
+              <td>Flujo estándar de checkout sin cambios respecto al comportamiento actual. Opciones de envío según zona.</td>
+              <td><span class="complexity-badge cb-low">Baja</span></td>
+            </tr>
+            <tr>
+              <td><span class="ac-id">CHO-03</span></td>
+              <td><span class="origin-pill op-wh">📦 WH / CD</span></td>
+              <td><span class="matrix-empty">—</span></td>
+              <td><span class="delivery-pill dp-point">Punto de retiro</span></td>
+              <td><span class="split-badge sb-no">Sin split</span></td>
+              <td>Confirmación del punto de retiro NDDC con plazo <strong class="matrix-strong">"3 días hábiles"</strong>. Similar a CHO-02 pero destino es el punto, no el domicilio.</td>
+              <td><span class="complexity-badge cb-low">Baja</span></td>
+            </tr>
+
+            <!-- GRUPO 2 -->
+            <tr class="matrix-group-row"><td colspan="7">Grupo 2 — 2 productos, mismo origen y destino</td></tr>
+            <tr>
+              <td><span class="ac-id">CHO-04</span></td>
+              <td><span class="origin-pill op-store">🏪 Unicenter</span></td>
+              <td><span class="origin-pill op-store">🏪 Unicenter</span></td>
+              <td><span class="delivery-pill dp-pickup">Retiro Unicenter (ambos)</span></td>
+              <td><span class="split-badge sb-no">Sin split</span></td>
+              <td>Se consolidan en <strong class="matrix-strong">un único retiro</strong>. Un código, un estimado. El CHO es idéntico a CHO-01. No hay complejidad adicional.</td>
+              <td><span class="complexity-badge cb-low">Baja</span></td>
+            </tr>
+            <tr>
+              <td><span class="ac-id">CHO-05</span></td>
+              <td><span class="origin-pill op-wh">📦 WH / CD</span></td>
+              <td><span class="origin-pill op-wh">📦 WH / CD</span></td>
+              <td><span class="delivery-pill dp-shipping">Envío domicilio (ambos)</span></td>
+              <td><span class="split-badge sb-no">Sin split</span></td>
+              <td>¿Se consolidan en un paquete o son 2 envíos? <strong class="matrix-strong">A definir con operador logístico.</strong> La UX del CHO varía si hay 1 o 2 trackings.</td>
+              <td><span class="complexity-badge cb-low">Baja</span></td>
+            </tr>
+
+            <!-- GRUPO 3 -->
+            <tr class="matrix-group-row"><td colspan="7">Grupo 3 — 2 productos, orígenes distintos (casos clave del usuario)</td></tr>
+            <tr>
+              <td><span class="ac-id">CHO-06</span></td>
+              <td><span class="origin-pill op-store">🏪 Unicenter</span></td>
+              <td><span class="origin-pill op-wh">📦 WH / CD</span></td>
+              <td class="delivery-stack">
+                <span class="delivery-pill dp-pickup">Retiro Unicenter</span>
+                <span class="delivery-pill dp-shipping">Envío domicilio</span>
+              </td>
+              <td><span class="split-badge sb-2m">2 métodos</span></td>
+              <td><strong class="matrix-strong">Carril A:</strong> retiro en Unicenter hoy. <strong class="matrix-strong">Carril B:</strong> envío a domicilio 3–5 días. Pago único, 2 trackings independientes. CHO debe mostrar ambos carriles en forma clara.</td>
+              <td><span class="complexity-badge cb-mid">Media</span></td>
+            </tr>
+            <tr class="matrix-row-hi">
+              <td><span class="ac-id">CHO-07</span></td>
+              <td><span class="origin-pill op-store">🏪 Unicenter</span></td>
+              <td><span class="origin-pill op-wh">📦 WH / CD</span></td>
+              <td class="delivery-stack">
+                <span class="delivery-pill dp-pickup">Retiro Unicenter</span>
+                <span class="delivery-pill dp-diff">Retiro Unicenter (diferido)</span>
+              </td>
+              <td><span class="split-badge sb-diff">Diferido</span></td>
+              <td><strong class="matrix-strong">Carril A:</strong> stock en tienda → retiro <em>hoy</em>. <strong class="matrix-strong">Carril B:</strong> CD despacha a Unicenter → retiro <em>en 3–5 días</em>. El cliente va a la misma tienda <strong class="matrix-strong">en dos momentos distintos</strong> o espera al carril más lento.</td>
+              <td><span class="complexity-badge cb-high">Alta</span></td>
+            </tr>
+            <tr>
+              <td><span class="ac-id">CHO-08</span></td>
+              <td><span class="origin-pill op-store">🏪 Unicenter</span></td>
+              <td><span class="origin-pill op-store">🏪 Alcorta</span></td>
+              <td class="delivery-stack">
+                <span class="delivery-pill dp-pickup">Retiro Unicenter</span>
+                <span class="delivery-pill dp-pickup">Retiro Alcorta</span>
+              </td>
+              <td><span class="split-badge sb-2t">2 tiendas</span></td>
+              <td>Split por <strong class="matrix-strong">tiendas distintas</strong>. 2 códigos de retiro independientes, 2 fechas. El CHO debe informar claramente que el cliente debe ir a 2 sucursales diferentes.</td>
+              <td><span class="complexity-badge cb-mid">Media</span></td>
+            </tr>
+            <tr>
+              <td><span class="ac-id">CHO-09</span></td>
+              <td><span class="origin-pill op-store">🏪 Unicenter</span></td>
+              <td><span class="origin-pill op-wh">📦 WH / CD</span></td>
+              <td class="delivery-stack">
+                <span class="delivery-pill dp-pickup">Retiro Unicenter</span>
+                <span class="delivery-pill dp-point">Punto de retiro</span>
+              </td>
+              <td><span class="split-badge sb-2m">2 métodos</span></td>
+              <td><strong class="matrix-strong">Carril A:</strong> retiro en Unicenter hoy. <strong class="matrix-strong">Carril B:</strong> punto de retiro NDDC en 3 días. Variante de CHO-06 con punto de retiro en vez de domicilio. Misma complejidad.</td>
+              <td><span class="complexity-badge cb-mid">Media</span></td>
+            </tr>
+
+            <!-- GRUPO 4 -->
+            <tr class="matrix-group-row"><td colspan="7">Grupo 4 — Stock en ambos lugares (tienda + WH) — decisión del usuario o del sistema</td></tr>
+            <tr>
+              <td><span class="ac-id">CHO-10</span></td>
+              <td><span class="origin-pill op-both">🔀 Unicenter + WH</span></td>
+              <td><span class="origin-pill op-both">🔀 Unicenter + WH</span></td>
+              <td><span class="delivery-pill dp-pickup">Retiro Unicenter (ambos)</span></td>
+              <td><span class="split-badge sb-no">Sin split</span></td>
+              <td>Si ambos se sirven desde tienda: <strong class="matrix-strong">sin split, retiro hoy</strong>. VTEX debe priorizar el stock de tienda cuando el destino coincide. <strong class="matrix-strong">Regla de priorización a definir técnicamente.</strong></td>
+              <td><span class="complexity-badge cb-mid">Media</span></td>
+            </tr>
+            <tr>
+              <td><span class="ac-id">CHO-11</span></td>
+              <td><span class="origin-pill op-both">🔀 Unicenter + WH</span></td>
+              <td><span class="origin-pill op-both">🔀 Unicenter + WH</span></td>
+              <td class="delivery-stack">
+                <span class="delivery-pill dp-pickup">A: Retiro Unicenter</span>
+                <span class="delivery-pill dp-shipping">B: Envío domicilio</span>
+              </td>
+              <td><span class="split-badge sb-2m">2 métodos</span></td>
+              <td>Split generado por <strong class="matrix-strong">elección del usuario</strong>, no por escasez. A va desde tienda; B va desde WH (aunque B también podría haber ido desde tienda). CHO confirma cada método por separado.</td>
+              <td><span class="complexity-badge cb-mid">Media</span></td>
+            </tr>
+            <tr class="matrix-row-hi">
+              <td><span class="ac-id">CHO-12</span></td>
+              <td><span class="origin-pill op-both">🔀 Unicenter + WH</span></td>
+              <td><span class="origin-pill op-wh">📦 Solo WH / CD</span></td>
+              <td class="delivery-stack">
+                <span class="delivery-pill dp-pickup">A: Retiro Unicenter</span>
+                <span class="delivery-pill dp-diff">B: Retiro Unicenter (diferido)</span>
+              </td>
+              <td><span class="split-badge sb-diff">Diferido</span></td>
+              <td><strong class="matrix-strong">Carril A:</strong> stock en tienda → retiro hoy. <strong class="matrix-strong">Carril B:</strong> solo WH → CD envía a Unicenter → 3–5 días. Igual que CHO-07 pero el origen de B es obligatorio (no hay opción de tienda).</td>
+              <td><span class="complexity-badge cb-high">Alta</span></td>
+            </tr>
+
+            <!-- GRUPO 5 -->
+            <tr class="matrix-group-row"><td colspan="7">Grupo 5 — Casos adicionales y edge cases</td></tr>
+            <tr>
+              <td><span class="ac-id">CHO-13</span></td>
+              <td><span class="origin-pill op-store">🏪 Unicenter</span></td>
+              <td><span class="origin-pill op-wh">📦 WH / CD</span> <span style="font-size:10px;color:var(--doc-subtle)">+ Prod. C: 🏪 Alcorta</span></td>
+              <td class="delivery-stack">
+                <span class="delivery-pill dp-pickup">A: Unicenter</span>
+                <span class="delivery-pill dp-shipping">B: Envío</span>
+                <span class="delivery-pill dp-pickup">C: Alcorta</span>
+              </td>
+              <td><span class="split-badge sb-trip">Triple split</span></td>
+              <td>Carrito de 3+ productos con 3 métodos distintos. UX muy compleja. CHO debe presentar 3 carriles. <strong class="matrix-strong">¿Hay un límite de splits?</strong> ¿Qué pasa si el usuario no puede ir a 2 tiendas diferentes?</td>
+              <td><span class="complexity-badge cb-high">Alta</span></td>
+            </tr>
+            <tr class="matrix-row-hi">
+              <td><span class="ac-id">CHO-14</span></td>
+              <td><span class="origin-pill op-store">🏪 Unicenter</span></td>
+              <td><span class="origin-pill op-store">🏪 Unicenter</span></td>
+              <td><span class="delivery-pill dp-pickup">Retiro Unicenter (ambos)</span></td>
+              <td><span class="split-badge sb-no">Sin split</span></td>
+              <td><strong class="matrix-strong">Prod. B se queda sin stock</strong> entre PDP y CHO (sin reserva aplicada). ¿El CHO bloquea el checkout, ofrece cambiar de tienda para B, o descarta el item y permite continuar? <strong class="matrix-strong">Caso crítico a definir.</strong></td>
+              <td><span class="complexity-badge cb-high">Alta</span></td>
+            </tr>
+            <tr>
+              <td><span class="ac-id">CHO-15</span></td>
+              <td><span class="origin-pill op-store">🏪 Unicenter</span></td>
+              <td><span class="origin-pill op-wh">📦 WH / CD</span></td>
+              <td class="delivery-stack">
+                <span class="delivery-pill dp-pickup">A: Retiro Unicenter</span>
+                <span class="delivery-pill dp-diff">B: Retiro Unicenter (diferido)</span>
+              </td>
+              <td><span class="split-badge sb-diff">Diferido</span></td>
+              <td>Variante de CHO-07 donde el usuario decide esperar ambos items para <strong class="matrix-strong">retirar en un solo viaje</strong>. ¿El sistema permite "consolidar" los carriles y notificar cuando el segundo está listo? UX a definir.</td>
+              <td><span class="complexity-badge cb-mid">Media</span></td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+
+      <div class="matrix-callout">
+        <div class="matrix-callout-icon">⚠</div>
+        <div>
+          <strong>CHO-07, CHO-12 y CHO-15</strong> implican que el cliente retira en la misma sucursal en <strong>dos momentos distintos</strong>. Antes de desarrollar el CHO, debe decidirse si esto se permite, si se sugiere consolidar los retiros, o si se ofrece al usuario cambiar el carril B a envío a domicilio para simplificar. <strong>CHO-14</strong> (stock agotado entre PDP y CHO) también es crítico porque afecta la tasa de conversión directamente.
+        </div>
+      </div>
+
+    </div><!-- /tab-cho-matriz -->
+
+    <!-- ── TAB: CRITERIOS ──────────────────────────────────── -->
+    <div id="tab-cho-criterios" class="tab-pane">
+      <p class="section-intro">Criterios de aceptación del CHO para el flujo BOPIS, comunes a todos los escenarios de la matriz.</p>
+      <div class="table-wrap">
+        <table class="req-table">
+          <thead>
+            <tr><th style="width:105px">ID</th><th>Criterio de aceptación</th><th style="width:260px">Condición esperada</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><span class="ac-id">CHO-AC-01</span></td><td>El CHO muestra cada carril de entrega de forma visual y separada</td><td>Cada split tiene su propia sección con método, fecha estimada y costo. No se mezclan en un único resumen ambiguo</td></tr>
+            <tr><td><span class="ac-id">CHO-AC-02</span></td><td>Los casos sin split se presentan como un flujo único sin indicadores de división</td><td>Si hay un solo carril, la UI no muestra numeración ni separadores de split</td></tr>
+            <tr><td><span class="ac-id">CHO-AC-03</span></td><td>Para retiro en tienda, el CHO confirma la sucursal y muestra el estimado de disponibilidad</td><td><em>"Retirar en Nike Unicenter — disponible hoy"</em> o con fecha específica según el origen del stock</td></tr>
+            <tr><td><span class="ac-id">CHO-AC-04</span></td><td>El usuario puede cambiar el método de entrega de un carril en el CHO sin volver a la PDP</td><td>Botón <em>"Cambiar método"</em> por carril que permita switchear entre retiro, punto de retiro y envío (según disponibilidad)</td></tr>
+            <tr><td><span class="ac-id">CHO-AC-05</span></td><td>Los costos se calculan correctamente por carril</td><td>Retiro en tienda = $0. Envío domicilio = tarifas vigentes. Retiro diferido en tienda (CD→tienda) = a definir si tiene costo</td></tr>
+            <tr><td><span class="ac-id">CHO-AC-06</span></td><td>Los casos diferidos (CHO-07, CHO-12, CHO-15) muestran 2 fechas distintas en la misma sucursal</td><td>UI diferencia claramente: <em>"Carril A: disponible hoy"</em> / <em>"Carril B: disponible en 3–5 días en la misma tienda"</em></td></tr>
+            <tr><td><span class="ac-id">CHO-AC-07</span></td><td>Si un producto se queda sin stock entre PDP y CHO (CHO-14), el sistema informa y ofrece alternativas</td><td>Bloqueo del item con mensaje y opciones: <em>"Buscar en otra tienda"</em> / <em>"Eliminar del carrito"</em>. No avanza el checkout con stock inexistente</td></tr>
+            <tr><td><span class="ac-id">CHO-AC-08</span></td><td>El resumen del pedido en el email post-compra refleja cada carril del split</td><td>Un email con todos los carriles listados individualmente: método, tienda o punto, fecha estimada</td></tr>
+            <tr><td><span class="ac-id">CHO-AC-09</span></td><td>En mobile, la presentación de splits es usable y no colapsada por defecto</td><td>Cada carril es un bloque visible en pantalla, con scroll vertical. No se usa acordeón que oculte información relevante</td></tr>
+            <tr><td><span class="ac-id">CHO-AC-10</span></td><td>Se disparan eventos de tracking al confirmar la compra con cada método de entrega</td><td>Evento <code>checkout_completed</code> con array de carriles: tipo, tienda/punto, origen del stock → GA4</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── TAB: PREGUNTAS ──────────────────────────────────── -->
+    <div id="tab-cho-preguntas" class="tab-pane">
+      <p class="section-intro">Decisiones de producto y técnicas que deben resolverse antes de iniciar el desarrollo del CHO.</p>
+      <div class="questions-grid">
+
+        <div class="question-card">
+          <div class="q-idx">1</div>
+          <div class="q-body">
+            <div class="q-text">¿VTEX soporta el split de carriles diferidos nativamente, o requiere customización del checkout?</div>
+            <div class="q-answer empty">A confirmar con el equipo técnico — define si el CHO puede construirse sobre la infraestructura de VTEX o requiere una capa custom para los casos CHO-07, CHO-12 y CHO-15.</div>
+            <span class="q-badge q-tech">🔧 A confirmar — técnico</span>
+          </div>
+        </div>
+
+        <div class="question-card">
+          <div class="q-idx">2</div>
+          <div class="q-body">
+            <div class="q-text">¿El stock en tienda se reserva al agregar al carrito (PDP) o recién al confirmar el pago (CHO)?</div>
+            <div class="q-answer empty">Si no hay reserva en PDP/CART, el CHO-14 ocurrirá frecuentemente en productos de alta demanda. Definir el modelo de reserva impacta directamente en la tasa de conversión.</div>
+            <span class="q-badge q-tech">🔧 A confirmar — técnico</span>
+          </div>
+        </div>
+
+        <div class="question-card">
+          <div class="q-idx">3</div>
+          <div class="q-body">
+            <div class="q-text">Para CHO-07, CHO-12 y CHO-15: ¿el cliente retira en 2 visitas o se consolidan los carriles?</div>
+            <div class="q-answer empty">Si se permite retirar en 2 visitas, el CHO debe comunicar 2 fechas y 2 notificaciones. Si se consolida, el carril más lento determina la fecha de retiro del pedido completo. Ambas implican UX diferente.</div>
+            <span class="q-badge q-brand">⚡ Decisión de producto</span>
+          </div>
+        </div>
+
+        <div class="question-card">
+          <div class="q-idx">4</div>
+          <div class="q-body">
+            <div class="q-text">¿Tiene costo el traslado CD → Tienda en los casos diferidos (CHO-07, CHO-12)?</div>
+            <div class="q-answer empty">Si el retiro diferido tiene un costo logístico adicional, debe mostrarse en el CHO de forma transparente. Si es gratis (como el retiro en el día), simplifica la UX.</div>
+            <span class="q-badge q-brand">⚡ A confirmar con la marca</span>
+          </div>
+        </div>
+
+        <div class="question-card">
+          <div class="q-idx">5</div>
+          <div class="q-body">
+            <div class="q-text">¿Cuántos splits puede tener un carrito como máximo? ¿Hay un límite de UX o técnico?</div>
+            <div class="q-answer empty">El caso CHO-13 (triple split) puede darse naturalmente si el usuario agrega productos de 3 orígenes distintos. Sin un límite definido, la UX del CHO puede volverse inmanejable.</div>
+            <span class="q-badge q-pending">⏳ Pendiente de decisión</span>
+          </div>
+        </div>
+
+        <div class="question-card">
+          <div class="q-idx">6</div>
+          <div class="q-body">
+            <div class="q-text">¿El usuario puede cambiar el punto de retiro NDDC en el CHO o queda fijado desde la PDP?</div>
+            <div class="q-answer empty">Si el usuario puede cambiarlo en el CHO, el carril de punto de retiro necesita un selector inline. Si está fijo desde la PDP, es más simple pero menos flexible para el usuario que llegó por URL directa.</div>
+            <span class="q-badge q-pending">⏳ Pendiente de decisión</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="page-footer">Unified Commerce — Nike AR &nbsp;·&nbsp; Requerimiento Técnico &nbsp;·&nbsp; En definición &nbsp;·&nbsp; infracommerce</div>
+
+<!-- ══ STORE SELECTOR MODAL ══════════════════════════════════ -->
+<div class="modal-overlay" id="storeModal" onclick="handleModalClick(event)">
+  <div class="store-modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title">Seleccioná tu tienda</div>
+      <input class="modal-search" type="text" placeholder="Buscar por nombre o zona..." oninput="filterStores(this.value)" id="storeSearch" />
+    </div>
+    <div class="store-list" id="storeList">
+      <div class="store-item" onclick="selectStore('Nike Palermo')">
+        <div class="store-item-left"><div class="store-item-name">Nike Palermo</div><div class="store-item-meta">Av. Santa Fe 3253 · 0.8 km</div></div>
+        <span class="store-item-avail">Disponible hoy</span>
+      </div>
+      <div class="store-item" onclick="selectStore('Nike Florida')">
+        <div class="store-item-left"><div class="store-item-name">Nike Florida</div><div class="store-item-meta">Florida 537, CABA · 2.1 km</div></div>
+        <span class="store-item-avail">Disponible hoy</span>
+      </div>
+      <div class="store-item" onclick="selectStore('Nike Abasto')">
+        <div class="store-item-left"><div class="store-item-name">Nike Abasto</div><div class="store-item-meta">Av. Corrientes 3247 · 3.4 km</div></div>
+        <span class="store-item-avail">Disponible hoy</span>
+      </div>
+      <div class="store-item" onclick="selectStore('Nike Alto Palermo')">
+        <div class="store-item-left"><div class="store-item-name">Nike Alto Palermo</div><div class="store-item-meta">Av. Santa Fe 3253, P1 · 1.2 km</div></div>
+        <span class="store-item-avail">Disponible hoy</span>
+      </div>
+      <div class="store-item" onclick="selectStore('Nike Unicenter')">
+        <div class="store-item-left"><div class="store-item-name">Nike Unicenter</div><div class="store-item-meta">Paraná 3745, Martínez · 18 km</div></div>
+        <span class="store-item-avail">Disponible hoy</span>
+      </div>
+      <div class="store-item" onclick="selectStore('Nike Dot')">
+        <div class="store-item-left"><div class="store-item-name">Nike Dot</div><div class="store-item-meta">Av. Vértiz 3616, CABA · 5.2 km</div></div>
+        <span class="store-item-avail">Disponible hoy</span>
+      </div>
+      <div class="store-item" onclick="selectStore('Nike Rosario')">
+        <div class="store-item-left"><div class="store-item-name">Nike Rosario</div><div class="store-item-meta">Córdoba 1140, Rosario · 300 km</div></div>
+        <span class="store-item-avail">Disponible hoy</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PDP PICKUP MODAL ══════════════════════════════════════ -->
+<div class="modal-overlay" id="pdpPickupModal" onclick="handlePdpModalClick(event)">
+  <div class="store-modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>Elige una ubicación de recogida</span>
+        <button onclick="closePdpModal()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--doc-muted);line-height:1;">✕</button>
+      </div>
+      <div class="pdp-modal-location">
+        <span class="pdp-modal-location-icon">🔍</span>
+        <span class="pdp-modal-location-text">Buenos Aires, Argentina</span>
+        <span class="pdp-modal-location-gps">⊕</span>
+      </div>
+      <div class="pdp-modal-filter">
+        <div class="pdp-modal-radio">
+          <input type="radio" name="pdpFilter" id="pdpFilterAll" value="all" checked onchange="renderPdpStores()">
+          <label for="pdpFilterAll">Todas las opciones</label>
+        </div>
+        <div class="pdp-modal-radio">
+          <input type="radio" name="pdpFilter" id="pdpFilterStore" value="store" onchange="renderPdpStores()">
+          <label for="pdpFilterStore">Solo tiendas Nike</label>
+        </div>
+      </div>
+    </div>
+    <div class="store-list" id="pdpStoreList"></div>
+  </div>
+</div>
+
+<!-- Rainbow bar (Infracommerce signature) -->
+<div class="rainbow-bar"></div>
+
+<!-- ══ JS ════════════════════════════════════════════════════ -->
+<script>
+  let isFiltered = false;
+  let selectedStore = null;
+  const TOTAL = 61;
+  const FILTERED = 13;
+
+  /* Journey navigation */
+  function switchJourney(key) {
+    const map = { intro: 0, plp: 1, pdp: 2, cart: 3, checkout: 4 };
+    const sectionMap = { intro: 'section-intro', plp: 'section-plp', pdp: 'section-pdp', cart: 'section-cart', checkout: 'section-checkout' };
+    document.querySelectorAll('.journey-step').forEach((el, i) => {
+      el.classList.toggle('active', i === map[key]);
+    });
+    document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+    document.getElementById(sectionMap[key]).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /* Tab switching */
+  function switchTab(btn, tabId) {
+    btn.closest('.tabs-nav').querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    btn.closest('.page-section').querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + tabId).classList.add('active');
+  }
+
+  /* Flow accordion */
+  function toggleFlow(headerEl) {
+    headerEl.closest('.flow-card').classList.toggle('open');
+  }
+
+  /* ── Demo interactions ── */
+  function handleToggleClick() {
+    if (isFiltered) {
+      deactivateFilter();
+    } else {
+      if (selectedStore) {
+        activateFilter(selectedStore);
+      } else {
+        openStoreModal();
+      }
+    }
+  }
+
+  function openStoreModal() {
+    document.getElementById('storeModal').classList.add('open');
+    document.getElementById('storeSearch').value = '';
+    filterStores('');
+    setTimeout(() => document.getElementById('storeSearch').focus(), 300);
+  }
+
+  function handleModalClick(e) {
+    if (e.target === document.getElementById('storeModal')) {
+      closeStoreModal();
+    }
+  }
+
+  function closeStoreModal() {
+    document.getElementById('storeModal').classList.remove('open');
+  }
+
+  function selectStore(storeName) {
+    closeStoreModal();
+    selectedStore = storeName;
+    activateFilter(storeName);
+  }
+
+  function activateFilter(storeName) {
+    isFiltered = true;
+    document.getElementById('pickupToggle').classList.add('on');
+    document.getElementById('storeSelectedName').textContent = storeName;
+    document.getElementById('storeSelectedRow').classList.add('visible');
+    document.getElementById('plpTitle').innerHTML =
+      'Air Force 1 <span class="store-in-title">en ' + storeName + '</span> <span id="resultCount">(' + FILTERED + ')</span>';
+    document.querySelectorAll('.product-card').forEach(card => {
+      if (card.dataset.available === 'false') card.classList.add('hidden');
+    });
+    const badge = document.getElementById('stateBadge');
+    badge.className = 'demo-state-badge state-filtered';
+    badge.textContent = '✓ Filtro activo · ' + FILTERED + ' resultados en ' + storeName;
+  }
+
+  function deactivateFilter() {
+    isFiltered = false;
+    document.getElementById('pickupToggle').classList.remove('on');
+    document.getElementById('storeSelectedRow').classList.remove('visible');
+    document.getElementById('plpTitle').innerHTML =
+      'Air Force 1 <span id="resultCount">(' + TOTAL + ')</span>';
+    document.querySelectorAll('.product-card').forEach(card => card.classList.remove('hidden'));
+    const badge = document.getElementById('stateBadge');
+    badge.className = 'demo-state-badge state-default';
+    badge.textContent = 'Sin filtro · ' + TOTAL + ' resultados';
+  }
+
+  function resetDemo() {
+    selectedStore = null;
+    deactivateFilter();
+  }
+
+  /* PDP scenario switching */
+  function switchPdpScenario(scenarioId, btn) {
+    document.querySelectorAll('.pdp-scenario-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.pdp-scenario').forEach(s => s.classList.remove('active'));
+    document.getElementById('pdp-scenario-' + scenarioId).classList.add('active');
+    const badge = document.getElementById('pdpStateBadge');
+    if (scenarioId === 'store-only') {
+      badge.className = 'demo-state-badge state-default';
+      badge.textContent = 'Solo stock en tienda Nike';
+    } else {
+      badge.className = 'demo-state-badge state-filtered';
+      badge.textContent = 'Stock en tienda + Warehouse NDDC';
+    }
+  }
+
+  /* PDP size selection */
+  function pdpSelectSize(btn) {
+    btn.closest('.pdp-size-grid').querySelectorAll('.pdp-size-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+  }
+
+  /* PDP Pickup Modal */
+  const pdpStores = {
+    'store-only': [
+      { name: 'Nike Palermo',      avail: 'Disponible hoy',                 type: 'tienda' },
+      { name: 'Nike Florida',      avail: 'Disponible hoy',                 type: 'tienda' },
+      { name: 'Nike Abasto',       avail: 'Disponible en 3 días',           type: 'tienda' },
+      { name: 'Nike Alto Palermo', avail: 'Disponible en 3 días',           type: 'tienda' },
+      { name: 'Nike Unicenter',    avail: 'Disponible hoy',                 type: 'tienda', capacityFull: true },
+      { name: 'Nike Dot',          avail: 'Sin stock — talle 43',           type: 'tienda', nostock: true },
+      { name: 'Nike Rosario',      avail: 'Disponible hoy',                 type: 'tienda' },
+    ],
+    'store-wh': [
+      { name: 'Nike Palermo',          avail: 'Disponible hoy',       type: 'tienda' },
+      { name: 'Nike Florida',          avail: 'Disponible hoy',       type: 'tienda' },
+      { name: 'Nike Abasto',           avail: 'Disponible en 3 días', type: 'tienda' },
+      { name: 'Nike Unicenter',        avail: 'Disponible en 3 días', type: 'tienda', capacityFull: true },
+      { name: 'Punto de retiro NDDC',  avail: 'Disponible en 3 días', type: 'nddc' },
+    ]
+  };
+
+  let _pdpScenario = null;
+
+  function openPdpModal(scenario) {
+    _pdpScenario = scenario;
+    document.getElementById('pdpFilterAll').checked = true;
+    renderPdpStores();
+    document.getElementById('pdpPickupModal').classList.add('open');
+  }
+
+  function renderPdpStores() {
+    const stores   = pdpStores[_pdpScenario] || [];
+    const onlyStore = document.getElementById('pdpFilterStore').checked;
+    const tiendas  = stores.filter(s => s.type === 'tienda');
+    const nddc     = onlyStore ? [] : stores.filter(s => s.type === 'nddc');
+
+    const renderCard = s => {
+      let availClass, availText;
+      if (s.nostock)       { availClass = 'pickup-card-nostock';   availText = s.avail; }
+      else if (s.capacityFull) { availClass = 'pickup-card-capacity'; availText = 'Cupo lleno hoy — sin reservas disponibles'; }
+      else if (s.avail.includes('hoy')) { availClass = 'pickup-card-avail-today'; availText = s.avail; }
+      else                 { availClass = 'pickup-card-avail-days'; availText = s.avail; }
+      const disabled = s.nostock || s.capacityFull;
+      return `<div class="pickup-card ${disabled ? 'pickup-card-disabled' : ''}" onclick="${disabled ? '' : 'closePdpModal()'}">
+        <div class="pickup-card-row"><div class="pickup-card-name">${s.name}</div></div>
+        <div class="${availClass}">${availText}</div>
+      </div>`;
+    };
+
+    let html = `<div class="pdp-modal-section">Tiendas más cercanas</div>`;
+    html += tiendas.map(renderCard).join('');
+    if (nddc.length) {
+      html += `<div class="pdp-modal-section" style="padding-top:8px">Punto de retiro</div>`;
+      html += nddc.map(s => `
+        <div class="pickup-card" onclick="closePdpModal()">
+          <div class="pickup-card-row">
+            <div class="pickup-card-name">${s.name}</div>
+            <span class="pickup-card-type-tag pct-nddc">NDDC</span>
+          </div>
+          <div class="pickup-card-avail-days">${s.avail}</div>
+        </div>`).join('');
+    }
+    document.getElementById('pdpStoreList').innerHTML = html;
+  }
+
+  function closePdpModal() {
+    document.getElementById('pdpPickupModal').classList.remove('open');
+  }
+
+  function handlePdpModalClick(e) {
+    if (e.target === document.getElementById('pdpPickupModal')) closePdpModal();
+  }
+
+  /* Store search filter */
+  function filterStores(query) {
+    const q = query.toLowerCase();
+    document.querySelectorAll('#storeList .store-item').forEach(item => {
+      const name = item.querySelector('.store-item-name').textContent.toLowerCase();
+      const meta = item.querySelector('.store-item-meta').textContent.toLowerCase();
+      item.style.display = (name.includes(q) || meta.includes(q)) ? '' : 'none';
+    });
+  }
+
+  /* Dark mode */
+  function toggleDark() {
+    const isDark = document.body.classList.toggle('dark');
+    document.getElementById('darkIcon').textContent = isDark ? '☀' : '◑';
+    try { localStorage.setItem('bopis_dark', isDark); } catch(e) {}
+  }
+
+  try {
+    if (localStorage.getItem('bopis_dark') === 'true') {
+      document.body.classList.add('dark');
+      document.getElementById('darkIcon').textContent = '☀';
+    }
+  } catch(e) {}
+</script>
+
+</body>
+</html>
