@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flujo Híbrido: Gestión Evolutiva de eCommerce</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f0f1a;
+    --card:#1a1a2e;
+    --card-alt:#20203a;
+    --border:#2a2a3e;
+    --purple:#7F77DD;
+    --purple-soft:rgba(127,119,221,0.12);
+    --teal:#3d9e8c;
+    --teal-soft:rgba(61,158,140,0.12);
+    --green:#4ade80;
+    --green-soft:rgba(74,222,128,0.12);
+    --blue:#60a5fa;
+    --blue-soft:rgba(96,165,250,0.12);
+    --yellow:#fbbf24;
+    --yellow-soft:rgba(251,191,36,0.14);
+    --text:#e8e8f2;
+    --text-dim:#a3a3bf;
+    --text-faint:#6f6f8f;
+    --radius:14px;
+    --maxw:860px;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    min-width:320px;
+  }
+
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:
+      radial-gradient(circle at 15% 5%, rgba(127,119,221,0.10), transparent 45%),
+      radial-gradient(circle at 85% 25%, rgba(61,158,140,0.08), transparent 45%);
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .wrap{
+    max-width:var(--maxw);
+    margin:0 auto;
+    padding:0 20px;
+    position:relative;
+    z-index:1;
+  }
+
+  /* ---------- HEADER ---------- */
+  header.hero{
+    padding:64px 0 48px;
+    text-align:center;
+  }
+
+  .badge{
+    display:inline-block;
+    font-size:0.72rem;
+    font-weight:600;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    color:var(--teal);
+    background:var(--teal-soft);
+    border:1px solid rgba(61,158,140,0.3);
+    padding:6px 14px;
+    border-radius:999px;
+    margin-bottom:22px;
+  }
+
+  header.hero h1{
+    font-size:2rem;
+    font-weight:800;
+    letter-spacing:-0.02em;
+    background:linear-gradient(135deg,#fff 30%,var(--purple) 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    margin-bottom:14px;
+  }
+
+  header.hero .subtitle{
+    font-size:1.02rem;
+    color:var(--text-dim);
+    font-weight:500;
+    margin-bottom:22px;
+  }
+
+  header.hero .author{
+    font-size:0.88rem;
+    color:var(--text-faint);
+  }
+
+  header.hero .author strong{color:var(--text);font-weight:600;}
+
+  /* ---------- SECTIONS ---------- */
+  section{
+    padding:48px 0;
+    border-top:1px solid var(--border);
+  }
+
+  section .kicker{
+    font-size:0.76rem;
+    font-weight:700;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--purple);
+    margin-bottom:10px;
+  }
+
+  section h2{
+    font-size:1.5rem;
+    font-weight:700;
+    letter-spacing:-0.01em;
+    margin-bottom:16px;
+  }
+
+  section h3{
+    font-size:1rem;
+    font-weight:600;
+    margin:28px 0 14px;
+  }
+
+  p{
+    color:var(--text-dim);
+    margin-bottom:14px;
+    font-size:0.94rem;
+  }
+
+  p strong{color:var(--text);font-weight:600;}
+
+  .intro{
+    font-size:0.96rem;
+    color:var(--text-dim);
+    margin-bottom:22px;
+  }
+
+  .fade-in{
+    opacity:0;
+    transform:translateY(20px);
+    transition:opacity .6s ease, transform .6s ease;
+  }
+  .fade-in.visible{opacity:1;transform:translateY(0);}
+
+  /* ---------- CARDS ---------- */
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:22px;
+  }
+
+  .context-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:24px;
+    margin-bottom:20px;
+  }
+
+  .context-item{
+    padding:12px 0;
+    border-top:1px solid var(--border);
+  }
+  .context-item:first-child{border-top:none;padding-top:0;}
+
+  .context-item .clabel{
+    font-size:0.7rem;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    color:var(--teal);
+    margin-bottom:4px;
+  }
+
+  .context-item .cval{
+    font-size:0.9rem;
+    color:var(--text-dim);
+  }
+
+  .context-item .cval strong{color:var(--text);}
+
+  /* ---------- TABLES ---------- */
+  .table-scroll{
+    overflow-x:auto;
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    -webkit-overflow-scrolling:touch;
+  }
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:0.83rem;
+    min-width:560px;
+  }
+
+  thead th{
+    background:var(--card-alt);
+    color:var(--purple);
+    text-align:left;
+    padding:12px 14px;
+    font-weight:600;
+    font-size:0.7rem;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    white-space:nowrap;
+  }
+
+  tbody td{
+    padding:11px 14px;
+    border-top:1px solid var(--border);
+    color:var(--text-dim);
+    vertical-align:top;
+  }
+
+  tbody td:first-child{
+    color:var(--text);
+    font-weight:600;
+    white-space:nowrap;
+  }
+
+  tr.exec-agente td{background:var(--green-soft);}
+  tr.exec-humano td{background:var(--blue-soft);}
+  tr.exec-colab td{background:var(--yellow-soft);}
+
+  .legend-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:18px;
+    margin:16px 0 8px;
+    font-size:0.82rem;
+    color:var(--text-dim);
+  }
+
+  .legend-row .sw{
+    display:inline-block;
+    width:12px;
+    height:12px;
+    border-radius:3px;
+    margin-right:7px;
+    vertical-align:middle;
+  }
+
+  /* ---------- ROLES 2-COL ---------- */
+  .roles-grid{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:18px;
+    margin-top:8px;
+  }
+
+  @media(min-width:660px){
+    .roles-grid{grid-template-columns:1fr 1fr;}
+  }
+
+  .role-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:22px;
+  }
+
+  .role-card.agente{border-top:3px solid var(--green);}
+  .role-card.humano{border-top:3px solid var(--blue);}
+
+  .role-card .role-title{
+    font-size:0.72rem;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    margin-bottom:4px;
+  }
+
+  .role-card.agente .role-title{color:var(--green);}
+  .role-card.humano .role-title{color:var(--blue);}
+
+  .role-card .role-sub{
+    font-size:0.98rem;
+    font-weight:700;
+    color:var(--text);
+    margin-bottom:14px;
+  }
+
+  .role-card ul{
+    list-style:none;
+  }
+
+  .role-card li{
+    font-size:0.86rem;
+    color:var(--text-dim);
+    padding:7px 0;
+    border-top:1px solid var(--border);
+    padding-left:16px;
+    position:relative;
+  }
+
+  .role-card li:first-child{border-top:none;}
+
+  .role-card li::before{
+    content:"—";
+    position:absolute;
+    left:0;
+    color:var(--text-faint);
+  }
+
+  .diff-card{
+    background:var(--purple-soft);
+    border:1px solid rgba(127,119,221,0.3);
+    border-radius:var(--radius);
+    padding:22px;
+    margin-top:20px;
+  }
+
+  .diff-card p{margin-bottom:0;font-size:0.9rem;color:var(--text-dim);}
+  .diff-card strong{color:var(--text);}
+
+  /* ---------- DIAGRAM ---------- */
+  .diagram-box{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:20px;
+    overflow-x:auto;
+    margin-top:20px;
+  }
+
+  .diagram-box svg{display:block;margin:0 auto;min-width:600px;}
+
+  /* ---------- KPI CARDS ---------- */
+  .kpi-grid{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:16px;
+    margin-top:20px;
+  }
+
+  @media(min-width:700px){
+    .kpi-grid{grid-template-columns:repeat(2,1fr);}
+  }
+
+  .kpi-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:22px;
+  }
+
+  .kpi-card .kpi-name{
+    font-size:0.72rem;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    color:var(--teal);
+    margin-bottom:10px;
+  }
+
+  .kpi-card .kpi-obj{
+    font-size:1.5rem;
+    font-weight:800;
+    color:var(--purple);
+    line-height:1.2;
+    margin-bottom:10px;
+  }
+
+  .kpi-card .kpi-desc{
+    font-size:0.84rem;
+    color:var(--text-dim);
+    margin-bottom:10px;
+  }
+
+  .kpi-card .kpi-action{
+    font-size:0.8rem;
+    color:var(--text-faint);
+    border-top:1px solid var(--border);
+    padding-top:10px;
+  }
+
+  .kpi-card .kpi-action b{color:var(--text);}
+
+  /* ---------- Q&A ---------- */
+  .qa-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:20px 22px;
+    margin-bottom:14px;
+  }
+
+  .qa-card .q{
+    font-size:0.92rem;
+    font-weight:700;
+    color:var(--text);
+    margin-bottom:8px;
+  }
+
+  .qa-card p{margin-bottom:0;font-size:0.88rem;}
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    border-top:1px solid var(--border);
+    padding:40px 0 56px;
+    text-align:center;
+  }
+
+  footer .foot-title{
+    font-weight:700;
+    font-size:1rem;
+    margin-bottom:4px;
+  }
+
+  footer .foot-author{
+    color:var(--text-dim);
+    font-size:0.86rem;
+    margin-bottom:12px;
+  }
+
+  footer .foot-tag{
+    color:var(--text-faint);
+    font-size:0.78rem;
+  }
+
+  @media(max-width:480px){
+    header.hero h1{font-size:1.5rem;}
+    header.hero .subtitle{font-size:0.9rem;}
+    section h2{font-size:1.2rem;}
+    .kpi-card .kpi-obj{font-size:1.2rem;}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="badge">Pre-entrega Clase 5 · IA Agents · CoderHouse · 2026</span>
+    <h1>Flujo Híbrido: Gestión Evolutiva de eCommerce</h1>
+    <p class="subtitle">Diseño de célula híbrida para PM/PO de sitios digitales</p>
+    <p class="author">Por <strong>Juan Pablo Camaño</strong></p>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- SECCIÓN 1 -->
+  <section id="proceso" class="fade-in">
+    <div class="kicker">Sección 1</div>
+    <h2>Proceso de negocio seleccionado</h2>
+
+    <div class="context-card">
+      <div class="context-item">
+        <div class="clabel">Organización</div>
+        <div class="cval">Consultora de eCommerce (<strong>Nike ARG/UY · VTEX IO</strong>)</div>
+      </div>
+      <div class="context-item">
+        <div class="clabel">Proceso</div>
+        <div class="cval">Desarrollo evolutivo del sitio web — desde la apertura de un requerimiento hasta su publicación y medición de impacto</div>
+      </div>
+      <div class="context-item">
+        <div class="clabel">Problema actual</div>
+        <div class="cval">El flujo está fragmentado en silos — Desarrollo en Jira, Contenido por fuera, Analytics después, Documentación nunca. El PM no tiene visibilidad unificada del end-to-end.</div>
+      </div>
+    </div>
+
+    <p>Este proceso involucra múltiples equipos trabajando en paralelo (Desarrollo, Contenido, CRO, Analytics) con tareas que van desde altamente repetitivas (crear tickets, documentar sprints) hasta decisiones estratégicas que requieren criterio humano irremplazable (aprobar un deploy a producción, validar un rediseño de UX). Es un caso ideal para una célula híbrida.</p>
+  </section>
+
+  <!-- SECCIÓN 2 -->
+  <section id="mapa" class="fade-in">
+    <div class="kicker">Sección 2</div>
+    <h2>Mapa completo del proceso</h2>
+
+    <div class="legend-row">
+      <span><span class="sw" style="background:var(--green)"></span>Tarea del agente autónomo</span>
+      <span><span class="sw" style="background:var(--blue)"></span>Tarea del humano</span>
+      <span><span class="sw" style="background:var(--yellow)"></span>Colaboración agente + humano</span>
+    </div>
+
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>Paso</th><th>Etapa</th><th>Naturaleza</th><th>Ejecutor</th></tr>
+        </thead>
+        <tbody>
+          <tr class="exec-colab"><td>1</td><td>Ingreso del requerimiento (ticket Jira)</td><td>Repetitiva</td><td>Agente (pre-completa campos) + Humano (confirma)</td></tr>
+          <tr class="exec-humano"><td>2</td><td>Planificación del sprint</td><td>Decisión estratégica</td><td>Humano (PM)</td></tr>
+          <tr class="exec-agente"><td>3</td><td>Seguimiento diario de avance</td><td>Repetitiva</td><td>Agente autónomo</td></tr>
+          <tr class="exec-colab"><td>4</td><td>Detección de bloqueos y riesgos</td><td>Análisis</td><td>Agente (detecta) + Humano (decide)</td></tr>
+          <tr class="exec-humano"><td>5</td><td>Validación de diseño / UX</td><td>Decisión creativa</td><td>Humano (CRO/Design)</td></tr>
+          <tr class="exec-colab"><td>6</td><td>QA técnica</td><td>Repetitiva estructurada</td><td>Agente (checklist) + Humano (aprueba)</td></tr>
+          <tr class="exec-humano"><td>7</td><td>Aprobación de deploy a producción</td><td>Alto impacto / irreversible</td><td>Humano (PM)</td></tr>
+          <tr class="exec-agente"><td>8</td><td>Carga de contenido en el sitio</td><td>Repetitiva</td><td>Agente autónomo</td></tr>
+          <tr class="exec-colab"><td>9</td><td>Medición de impacto post-lanzamiento</td><td>Análisis</td><td>Agente (mide) + Humano (interpreta)</td></tr>
+          <tr class="exec-colab"><td>10</td><td>Documentación del sprint/proyecto</td><td>Repetitiva</td><td>Agente autónomo (borrador) + Humano (aprueba)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- SECCIÓN 3 -->
+  <section id="roles" class="fade-in">
+    <div class="kicker">Sección 3</div>
+    <h2>Roles definidos</h2>
+
+    <div class="roles-grid">
+      <div class="role-card agente">
+        <div class="role-title">Agente autónomo</div>
+        <div class="role-sub">¿Qué hace?</div>
+        <ul>
+          <li>Pre-completar campos de tickets nuevos en Jira</li>
+          <li>Monitorear avance del sprint en tiempo real</li>
+          <li>Detectar bloqueos y generar alertas de riesgo</li>
+          <li>Generar checklist de implementación por ticket</li>
+          <li>Cargar y publicar contenido post-aprobación</li>
+          <li>Medir KPIs post-lanzamiento (conversión, latencia, score)</li>
+          <li>Generar borrador de documentación del sprint</li>
+        </ul>
+      </div>
+
+      <div class="role-card humano">
+        <div class="role-title">Humano (PM/PO)</div>
+        <div class="role-sub">¿Qué hace?</div>
+        <ul>
+          <li>Confirmar apertura y prioridad de tickets</li>
+          <li>Definir objetivo y scope del sprint</li>
+          <li>Validar diseño y experiencia de usuario</li>
+          <li>Aprobar deploy a producción</li>
+          <li>Interpretar datos y decidir próximos pasos</li>
+          <li>Aprobar documentación antes de publicar</li>
+          <li>Gestionar excepciones y casos no contemplados</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="diff-card">
+      <p>El seguimiento diario y las alertas de riesgo son tareas para un <strong>agente autónomo</strong> — requieren procesar múltiples fuentes de datos, mantener estado en el tiempo y reaccionar ante cambios sin que el PM tenga que preguntar. En cambio, responder consultas puntuales del equipo ("¿en qué estado está el ticket X?") es tarea de un <strong>chatbot reactivo</strong> — no necesita planificación, solo leer y responder. Son dos herramientas distintas para dos necesidades distintas.</p>
+    </div>
+  </section>
+
+  <!-- SECCIÓN 4 -->
+  <section id="flujo" class="fade-in">
+    <div class="kicker">Sección 4</div>
+    <h2>Diagrama del flujo híbrido</h2>
+
+    <div class="legend-row">
+      <span><span class="sw" style="background:var(--green)"></span>Nodo del agente</span>
+      <span><span class="sw" style="background:var(--blue)"></span>Nodo del humano</span>
+      <span><span class="sw" style="background:var(--yellow)"></span>Punto de colaboración</span>
+      <span><span class="sw" style="background:var(--purple);border-radius:50%"></span>Punto de decisión (rombo)</span>
+    </div>
+
+    <div class="diagram-box">
+      <svg viewBox="0 0 900 1330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama del flujo híbrido de gestión evolutiva de eCommerce">
+        <defs>
+          <marker id="ah" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L0,6 L9,3 z" fill="#a3a3bf"/>
+          </marker>
+        </defs>
+
+        <!-- S0 start -->
+        <rect x="100" y="10" width="240" height="50" rx="10" fill="#20203a" stroke="#7F77DD" stroke-width="1.5"/>
+        <text x="220" y="40" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="13" font-weight="700">Nuevo requerimiento</text>
+        <line x1="220" y1="60" x2="220" y2="93" stroke="#a3a3bf" stroke-width="1.5" marker-end="url(#ah)"/>
+
+        <!-- S1 AGENTE pre-completa -->
+        <rect x="100" y="95" width="240" height="54" rx="10" fill="#132a1e" stroke="#4ade80" stroke-width="1.5"/>
+        <text x="220" y="118" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="12" font-weight="700">AGENTE</text>
+        <text x="220" y="135" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="10.5">pre-completa ticket</text>
+
+        <line x1="340" y1="122" x2="558" y2="122" stroke="#a3a3bf" stroke-width="1.5" marker-end="url(#ah)"/>
+
+        <!-- S1b HUMANO confirma -->
+        <rect x="560" y="95" width="240" height="54" rx="10" fill="#122338" stroke="#60a5fa" stroke-width="1.5"/>
+        <text x="680" y="118" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="12" font-weight="700">HUMANO</text>
+        <text x="680" y="135" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="10.5">confirma y prioriza</text>
+
+        <line x1="680" y1="149" x2="240" y2="200" stroke="#a3a3bf" stroke-width="1.5" marker-end="url(#ah)"/>
+
+        <!-- S2 HUMANO planifica sprint -->
+        <rect x="100" y="202" width="240" height="54" rx="10" fill="#122338" stroke="#60a5fa" stroke-width="1.5"/>
+        <text x="220" y="225" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="12" font-weight="700">HUMANO</text>
+        <text x="220" y="242" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="10.5">planifica sprint y define scope</text>
+
+        <line x1="220" y1="256" x2="220" y2="297" stroke="#a3a3bf" stroke-width="1.5" marker-end="url(#ah)"/>
+
+        <!-- S3 AGENTE monitorea -->
+        <rect x="100" y="299" width="240" height="54" rx="10" fill="#132a1e" stroke="#4ade80" stroke-width="1.5"/>
+        <text x="220" y="322" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="12" font-weight="700">AGENTE</text>
+        <text x="220" y="339" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="10.5">monitorea avance diario</text>
+
+        <line x1="220" y1="353" x2="220" y2="394" stroke="#a3a3bf" stroke-width="1.5" marker-end="url(#ah)"/>
+
+        <!-- decision diamond -->
+        <polygon points="220,396 360,441 220,486 80,441" fill="#7F77DD" fill-opacity="0.15" stroke="#7F77DD" stroke-width="1.5"/>
+        <text x="220" y="436" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="11" font-weight="700">¿Hay bloqueo</text>
+        <text x="220" y="452" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="11" font-weight="700">o riesgo?</text>
+
+        <!-- NO branch straight down -->
+        <line x1="220" y1="486" x2="220" y2="587" stroke="#a3a3bf" stroke-width="1.5" marker-end="url(#ah)"/>
+        <text x="234" y="520" fill="#6f6f8f" font-family="Inter,sans-serif" font-size="10.5">[NO]</text>
+
+        <!-- SI branch right -->
+        <line x1="360" y1="441" x2="558" y2="441" stroke="#a3a3bf" stroke-width="1.5" marker-end="url(#ah)"/>
+        <text x="460" y="431" text-anchor="middle" fill="#6f6f8f" font-family="Inter,sans-serif" font-size="10.5">[SÍ]</text>
+
+        <!-- S4b AGENTE genera alerta -->
+        <rect x="560" y="414" width="240" height="54" rx="10" fill="#132a1e" stroke="#4ade80" stroke-width="1.5"/>
+        <text x="680" y="437" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="12" font-weight="700">AGENTE</text>
+        <text x="680" y="454" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="10.5">genera alerta</text>
+
+        <line x1="680" y1="468" x2="680" y2="500" stroke="#a3a3bf" stroke-width="1.5" marker-end="url(#ah)"/>
+
+        <!-- S4c HUMANO decide -->
+        <rect x="560" y="502" width="240" height="54" rx="10" fill="#122338" stroke="#60a5fa" stroke-width="1.5"/>
+        <text x="680" y="525" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="12" font-weight="700">HUMANO</text>
+        <text x="680" y="542" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="10.5">decide cómo resolver</text>
+
+        <line x1="680" y1="556" x2="240" y2="587" stroke="#a3a3bf" stroke-width="1.5" marker-end="url(#ah)"/>
+
+        <!-- S5 HUMANO valida diseño/UX -->
+        <rect x="100" y="589" width="240" height="54" rx="10" fill="#122338" stroke="#60a5fa" stroke-width="1.5"/>
+        <text x="220" y="612" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="12" font-weight="700">HUMANO</text>
+        <text x="220" y="629" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="10.5">valida diseño / UX</text>
+
+        <line x1="220" y1="643" x2="220" y2="684" stroke="#a3a3bf" stroke-width="1.5" marker-end="url(#ah)"/>
+
+        <!-- S6 AGENTE genera checklist QA -->
+        <rect x="100" y="686" width="240" height="54" rx="10" fill="#132a1e" stroke="#4ade80" stroke-width="1.5"/>
+        <text x="220" y="709" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="12" font-weight="700">AGENTE</text>
+        <text x="220" y="726" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="10.5">genera checklist de QA</text>
+
+        <line x1="340" y1="713" x2="558" y2="713" stroke="#a3a3bf" stroke-width="1.5" marker-end="url(#ah)"/>
+
+        <!-- S6b HUMANO aprueba QA -->
+        <rect x="560" y="686" width="240" height="54" rx="10" fill="#122338" stroke="#60a5fa" stroke-width="1.5"/>
+        <text x="680" y="709" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="12" font-weight="700">HUMANO</text>
+        <text x="680" y="726" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="10.5">aprueba QA</text>
+
+        <line x1="680" y1="740" x2="240" y2="791" stroke="#a3a3bf" stroke-width="1.5" marker-end="url(#ah)"/>
+
+        <!-- S7 HUMANO aprueba deploy -->
+        <rect x="100" y="793" width="240" height="54" rx="10" fill="#122338" stroke="#60a5fa" stroke-width="1.5"/>
+        <text x="220" y="816" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="12" font-weight="700">HUMANO</text>
+        <text x="220" y="833" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="10.5">aprueba deploy a producción</text>
+
+        <line x1="220" y1="847" x2="220" y2="888" stroke="#a3a3bf" stroke-width="1.5" marker-end="url(#ah)"/>
+
+        <!-- S8 AGENTE carga contenido -->
+        <rect x="100" y="890" width="240" height="54" rx="10" fill="#132a1e" stroke="#4ade80" stroke-width="1.5"/>
+        <text x="220" y="913" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="12" font-weight="700">AGENTE</text>
+        <text x="220" y="930" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="10.5">carga contenido y publica</text>
+
+        <line x1="220" y1="944" x2="220" y2="985" stroke="#a3a3bf" stroke-width="1.5" marker-end="url(#ah)"/>
+
+        <!-- S9 AGENTE mide impacto -->
+        <rect x="100" y="987" width="240" height="54" rx="10" fill="#132a1e" stroke="#4ade80" stroke-width="1.5"/>
+        <text x="220" y="1010" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="12" font-weight="700">AGENTE</text>
+        <text x="220" y="1027" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="10.5">mide impacto post-lanzamiento</text>
+
+        <line x1="220" y1="1041" x2="220" y2="1082" stroke="#a3a3bf" stroke-width="1.5" marker-end="url(#ah)"/>
+
+        <!-- S10 AGENTE genera borrador documentación -->
+        <rect x="100" y="1084" width="240" height="54" rx="10" fill="#132a1e" stroke="#4ade80" stroke-width="1.5"/>
+        <text x="220" y="1107" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="12" font-weight="700">AGENTE</text>
+        <text x="220" y="1124" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="10.5">genera borrador de documentación</text>
+
+        <line x1="340" y1="1111" x2="558" y2="1111" stroke="#a3a3bf" stroke-width="1.5" marker-end="url(#ah)"/>
+
+        <!-- S10b HUMANO aprueba y publica -->
+        <rect x="560" y="1084" width="240" height="54" rx="10" fill="#122338" stroke="#60a5fa" stroke-width="1.5"/>
+        <text x="680" y="1107" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="12" font-weight="700">HUMANO</text>
+        <text x="680" y="1124" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="10.5">aprueba y publica</text>
+
+        <line x1="680" y1="1138" x2="240" y2="1189" stroke="#a3a3bf" stroke-width="1.5" marker-end="url(#ah)"/>
+
+        <!-- S11 end -->
+        <rect x="100" y="1191" width="240" height="50" rx="10" fill="#20203a" stroke="#7F77DD" stroke-width="1.5"/>
+        <text x="220" y="1221" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="13" font-weight="700">Proceso completado</text>
+
+        <text x="100" y="1280" fill="#6f6f8f" font-family="Inter,sans-serif" font-size="10.5">Cada punto de colaboración (agente→humano) es un gate de control: el agente propone, el humano decide.</text>
+      </svg>
+    </div>
+  </section>
+
+  <!-- SECCIÓN 5 -->
+  <section id="kpis" class="fade-in">
+    <div class="kicker">Sección 5</div>
+    <h2>KPIs operativos del flujo</h2>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-name">KPI 1 — Latencia del agente</div>
+        <div class="kpi-obj">&lt; 2 min</div>
+        <div class="kpi-desc">Tiempo desde que el PM solicita análisis hasta que el agente entrega el checklist</div>
+        <div class="kpi-action"><b>Acción si cae:</b> Optimizar el prompt y reducir contexto enviado</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-name">KPI 2 — Tasa de éxito de alertas</div>
+        <div class="kpi-obj">&gt; 80%</div>
+        <div class="kpi-desc">Qué porcentaje de alertas generadas por el agente resultan en una acción real (no son ruido)</div>
+        <div class="kpi-action"><b>Acción si cae:</b> Ajustar umbrales de detección de riesgo</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-name">KPI 3 — Adopción de borradores de documentación</div>
+        <div class="kpi-obj">&gt; 70%</div>
+        <div class="kpi-desc">Si el borrador generado por el agente es útil tal como está o requiere reescritura completa</div>
+        <div class="kpi-action"><b>Acción si cae:</b> Iterar el template con feedback del PM</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-name">KPI 4 — Ratio de intervención humana</div>
+        <div class="kpi-obj">40%</div>
+        <div class="kpi-desc">Del tiempo total del proceso, qué porcentaje requiere acción humana (baseline actual: 100%)</div>
+        <div class="kpi-action"><b>Acción si cae de forma inesperada:</b> Verificar que el agente no esté tomando decisiones que deberían ser humanas</div>
+      </div>
+    </div>
+
+    <h3>Tabla resumen</h3>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>KPI</th><th>Baseline actual</th><th>Objetivo</th><th>Herramienta de medición</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Latencia del agente</td><td>N/A (manual: ~30 min)</td><td>&lt; 2 min</td><td>Logs de Claude API</td></tr>
+          <tr><td>Tasa de éxito alertas</td><td>0% (no existe)</td><td>&gt; 80%</td><td>Dashboard Delivery Hub</td></tr>
+          <tr><td>Adopción borradores</td><td>0% (no existe)</td><td>&gt; 70%</td><td>Registro de aprobaciones</td></tr>
+          <tr><td>Ratio intervención humana</td><td>100%</td><td>40%</td><td>Time tracking del flujo</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- SECCIÓN 6 -->
+  <section id="verificacion" class="fade-in">
+    <div class="kicker">Sección 6</div>
+    <h2>Verificación de conocimientos</h2>
+
+    <div class="qa-card">
+      <div class="q">¿Podés diferenciar entre chatbot reactivo y agente autónomo?</div>
+      <p>En este flujo, el chatbot reactivo responde preguntas puntuales del equipo ("¿en qué estado está el ticket X?") sin planificación. El agente autónomo monitorea el sprint continuamente, detecta riesgos sin que se lo pidan, y genera documentación al cierre — requiere estado, planificación y capacidad de reacción proactiva.</p>
+    </div>
+
+    <div class="qa-card">
+      <div class="q">¿Los roles humanos y automáticos están asignados coherentemente?</div>
+      <p>Sí. El criterio fue: si la tarea es repetitiva, medible y tiene un output predecible → agente. Si requiere juicio, creatividad o tiene consecuencias irreversibles → humano. Los puntos de colaboración ocurren cuando el agente puede reducir el trabajo pero el humano debe mantener el control.</p>
+    </div>
+
+    <div class="qa-card">
+      <div class="q">¿Incorporaste KPIs relevantes?</div>
+      <p>Sí. Los 4 KPIs cubren las 3 dimensiones fundamentales: velocidad (latencia), calidad (tasa de éxito y adopción) y eficiencia (ratio de intervención humana). Cada uno tiene baseline, objetivo y acción de respuesta si cae bajo umbral.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-title">Juan Pablo Camaño</div>
+    <div class="foot-author">IA Agents — CoderHouse</div>
+    <div class="foot-tag">Pre-entrega Clase 5 · IA Agents · CoderHouse · 2026</div>
+  </div>
+</footer>
+
+<script>
+  var fadeEls = document.querySelectorAll('.fade-in');
+  var observer = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  fadeEls.forEach(function(el){ observer.observe(el); });
+</script>
+
+</body>
+</html>
