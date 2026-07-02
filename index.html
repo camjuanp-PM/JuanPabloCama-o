@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KPIs Operativos de Agentes Inteligentes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f0f1a;
+    --card:#1a1a2e;
+    --card-alt:#20203a;
+    --border:#2a2a3e;
+    --purple:#7F77DD;
+    --purple-soft:rgba(127,119,221,0.12);
+    --teal:#3d9e8c;
+    --teal-soft:rgba(61,158,140,0.12);
+    --amber:#e0a458;
+    --amber-soft:rgba(224,164,88,0.12);
+    --text:#e8e8f2;
+    --text-dim:#a3a3bf;
+    --text-faint:#6f6f8f;
+    --radius:14px;
+    --maxw:860px;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    min-width:320px;
+  }
+
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:
+      radial-gradient(circle at 15% 5%, rgba(127,119,221,0.10), transparent 45%),
+      radial-gradient(circle at 85% 25%, rgba(61,158,140,0.08), transparent 45%);
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .wrap{
+    max-width:var(--maxw);
+    margin:0 auto;
+    padding:0 20px;
+    position:relative;
+    z-index:1;
+  }
+
+  /* ---------- HEADER ---------- */
+  header.hero{
+    padding:64px 0 48px;
+    text-align:center;
+  }
+
+  .badge{
+    display:inline-block;
+    font-size:0.72rem;
+    font-weight:600;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    color:var(--teal);
+    background:var(--teal-soft);
+    border:1px solid rgba(61,158,140,0.3);
+    padding:6px 14px;
+    border-radius:999px;
+    margin-bottom:22px;
+  }
+
+  header.hero h1{
+    font-size:2.1rem;
+    font-weight:800;
+    letter-spacing:-0.02em;
+    background:linear-gradient(135deg,#fff 30%,var(--purple) 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    margin-bottom:14px;
+  }
+
+  header.hero .subtitle{
+    font-size:1.05rem;
+    color:var(--text-dim);
+    font-weight:500;
+    margin-bottom:22px;
+  }
+
+  header.hero .author{
+    font-size:0.88rem;
+    color:var(--text-faint);
+  }
+
+  header.hero .author strong{color:var(--text);font-weight:600;}
+
+  /* ---------- SECTIONS ---------- */
+  section{
+    padding:48px 0;
+    border-top:1px solid var(--border);
+  }
+
+  section .kicker{
+    font-size:0.76rem;
+    font-weight:700;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--purple);
+    margin-bottom:10px;
+  }
+
+  section h2{
+    font-size:1.5rem;
+    font-weight:700;
+    letter-spacing:-0.01em;
+    margin-bottom:16px;
+  }
+
+  section h3{
+    font-size:1rem;
+    font-weight:600;
+    margin:28px 0 14px;
+  }
+
+  p{
+    color:var(--text-dim);
+    margin-bottom:14px;
+    font-size:0.94rem;
+  }
+
+  p strong{color:var(--text);font-weight:600;}
+
+  .intro{
+    font-size:0.96rem;
+    color:var(--text-dim);
+    margin-bottom:22px;
+  }
+
+  .fade-in{
+    opacity:0;
+    transform:translateY(20px);
+    transition:opacity .6s ease, transform .6s ease;
+  }
+  .fade-in.visible{opacity:1;transform:translateY(0);}
+
+  /* ---------- CARDS ---------- */
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:22px;
+  }
+
+  .data-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:24px;
+    margin-bottom:24px;
+  }
+
+  .data-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+    margin-top:14px;
+  }
+
+  @media(min-width:600px){
+    .data-grid{grid-template-columns:repeat(4,1fr);}
+  }
+
+  .data-item .val{
+    font-size:1.35rem;
+    font-weight:800;
+    color:var(--purple);
+    line-height:1.2;
+  }
+
+  .data-item .lbl{
+    font-size:0.76rem;
+    color:var(--text-faint);
+    margin-top:4px;
+  }
+
+  .calc-grid{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:16px;
+    margin-top:8px;
+  }
+
+  @media(min-width:680px){
+    .calc-grid{grid-template-columns:repeat(3,1fr);}
+  }
+
+  .calc-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:20px;
+  }
+
+  .calc-card .calc-title{
+    font-size:0.7rem;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    color:var(--teal);
+    margin-bottom:12px;
+  }
+
+  .calc-card .calc-row{
+    font-size:0.78rem;
+    color:var(--text-faint);
+    margin-bottom:2px;
+  }
+
+  .calc-card .calc-formula{
+    font-size:0.82rem;
+    color:var(--text-dim);
+    margin-bottom:10px;
+    font-family:'Courier New',monospace;
+  }
+
+  .calc-card .calc-result{
+    font-size:1.7rem;
+    font-weight:800;
+    color:var(--purple);
+    margin-bottom:10px;
+    line-height:1;
+  }
+
+  .calc-card .calc-interp{
+    font-size:0.82rem;
+    color:var(--text-dim);
+    border-top:1px solid var(--border);
+    padding-top:10px;
+  }
+
+  /* ---------- TABLES ---------- */
+  .table-scroll{
+    overflow-x:auto;
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    -webkit-overflow-scrolling:touch;
+  }
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:0.84rem;
+    min-width:520px;
+  }
+
+  thead th{
+    background:var(--card-alt);
+    color:var(--purple);
+    text-align:left;
+    padding:12px 16px;
+    font-weight:600;
+    font-size:0.72rem;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    white-space:nowrap;
+  }
+
+  tbody td{
+    padding:12px 16px;
+    border-top:1px solid var(--border);
+    color:var(--text-dim);
+    vertical-align:top;
+    background:var(--card);
+  }
+
+  tbody td:first-child{
+    color:var(--text);
+    font-weight:600;
+  }
+
+  /* ---------- CHART ---------- */
+  .diagram-box{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:20px;
+    overflow-x:auto;
+    margin-top:20px;
+  }
+
+  .diagram-box svg{display:block;margin:0 auto;min-width:560px;}
+
+  /* ---------- Q&A CARDS ---------- */
+  .qa-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:20px 22px;
+    margin-bottom:14px;
+  }
+
+  .qa-card .q{
+    font-size:0.92rem;
+    font-weight:700;
+    color:var(--text);
+    margin-bottom:8px;
+  }
+
+  .qa-card .q .qnum{
+    color:var(--purple);
+    margin-right:6px;
+  }
+
+  .qa-card p{margin-bottom:0;font-size:0.88rem;}
+
+  .action-grid{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:12px;
+    margin-top:12px;
+  }
+
+  @media(min-width:640px){
+    .action-grid{grid-template-columns:1fr 1fr;}
+  }
+
+  .action-card{
+    background:var(--card-alt);
+    border:1px solid var(--border);
+    border-left:3px solid var(--teal);
+    border-radius:10px;
+    padding:14px 16px;
+  }
+
+  .action-card .action-title{
+    font-size:0.76rem;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.03em;
+    color:var(--teal);
+    margin-bottom:6px;
+  }
+
+  .action-card p{font-size:0.84rem;margin-bottom:8px;}
+
+  .action-card .impact{
+    font-size:0.78rem;
+    color:var(--text-faint);
+    border-top:1px dashed var(--border);
+    padding-top:8px;
+  }
+
+  .action-card .impact b{color:var(--text);}
+
+  /* ---------- INTERVENTION TABLE / REFLECTION ---------- */
+  .reflection-card{
+    background:var(--purple-soft);
+    border:1px solid rgba(127,119,221,0.3);
+    border-radius:var(--radius);
+    padding:24px;
+    margin-top:24px;
+  }
+
+  .reflection-card p{color:var(--text-dim);margin-bottom:0;font-size:0.92rem;}
+
+  /* ---------- LEGEND ---------- */
+  .legend-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:18px;
+    margin-top:14px;
+    font-size:0.8rem;
+    color:var(--text-dim);
+  }
+
+  .legend-row .sw{
+    display:inline-block;
+    width:12px;
+    height:12px;
+    border-radius:3px;
+    margin-right:6px;
+    vertical-align:middle;
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    border-top:1px solid var(--border);
+    padding:40px 0 56px;
+    text-align:center;
+  }
+
+  footer .foot-title{
+    font-weight:700;
+    font-size:1rem;
+    margin-bottom:4px;
+  }
+
+  footer .foot-author{
+    color:var(--text-dim);
+    font-size:0.86rem;
+    margin-bottom:12px;
+  }
+
+  footer .foot-tag{
+    color:var(--text-faint);
+    font-size:0.78rem;
+  }
+
+  @media(max-width:480px){
+    header.hero h1{font-size:1.5rem;}
+    header.hero .subtitle{font-size:0.9rem;}
+    section h2{font-size:1.2rem;}
+    .calc-card .calc-result{font-size:1.4rem;}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="badge">Pre-entrega Clase 4 · IA Agents · CoderHouse · 2026</span>
+    <h1>KPIs Operativos de Agentes Inteligentes</h1>
+    <p class="subtitle">Análisis, interpretación y diseño de flujo híbrido</p>
+    <p class="author">Por <strong>Juan Pablo Camaño</strong></p>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- SECCIÓN 1 -->
+  <section id="kpis" class="fade-in">
+    <div class="kicker">Sección 1</div>
+    <h2>Definición y Cálculo de KPIs</h2>
+    <p class="intro">Los KPIs operativos permiten medir si un agente autónomo está funcionando bien. Los tres fundamentales son latencia, tasa de éxito y costo por tarea.</p>
+
+    <div class="data-card">
+      <h3 style="margin-top:0">Datos del agente</h3>
+      <div class="data-grid">
+        <div class="data-item">
+          <div class="val">200</div>
+          <div class="lbl">Tareas diarias procesadas</div>
+        </div>
+        <div class="data-item">
+          <div class="val">45s</div>
+          <div class="lbl">Tiempo promedio por tarea</div>
+        </div>
+        <div class="data-item">
+          <div class="val">170</div>
+          <div class="lbl">Tareas completadas correctamente</div>
+        </div>
+        <div class="data-item">
+          <div class="val">$400</div>
+          <div class="lbl">Costo operativo diario</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="calc-grid">
+      <div class="calc-card">
+        <div class="calc-title">Latencia Promedio</div>
+        <div class="calc-row">Fórmula:</div>
+        <div class="calc-formula">Tiempo promedio por tarea</div>
+        <div class="calc-result">45s</div>
+        <div class="calc-interp">Cada tarea tarda 45 segundos en completarse. Es el tiempo desde que el agente recibe la tarea hasta que entrega el resultado. Un valor bajo indica mayor velocidad de procesamiento.</div>
+      </div>
+
+      <div class="calc-card">
+        <div class="calc-title">Tasa de Éxito</div>
+        <div class="calc-row">Fórmula:</div>
+        <div class="calc-formula">(Correctas / Totales) × 100</div>
+        <div class="calc-row">Cálculo: (170 / 200) × 100</div>
+        <div class="calc-result">85%</div>
+        <div class="calc-interp">El agente completa correctamente 85 de cada 100 tareas. Por debajo del 90% suele requerir revisión del flujo o los prompts del agente.</div>
+      </div>
+
+      <div class="calc-card">
+        <div class="calc-title">Costo por Tarea</div>
+        <div class="calc-row">Fórmula:</div>
+        <div class="calc-formula">Costo diario / Tareas totales</div>
+        <div class="calc-row">Cálculo: $400 / 200</div>
+        <div class="calc-result">$2.00</div>
+        <div class="calc-interp">Cada tarea procesada cuesta $2 USD. Este valor es clave para evaluar escalabilidad — si mañana proceso 2000 tareas, el costo sería $4000 diarios.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN 2 -->
+  <section id="dashboard" class="fade-in">
+    <div class="kicker">Sección 2</div>
+    <h2>Interpretación de Dashboard</h2>
+    <p class="intro">El siguiente dashboard muestra el desempeño de un agente inteligente durante una semana operativa. El análisis de tendencias permite detectar problemas antes de que escalen.</p>
+
+    <h3 style="margin-top:0">Tabla de datos</h3>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>Día</th><th>Latencia Prom. (s)</th><th>Tasa de Éxito (%)</th><th>Costo por Tarea (USD)</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="border-left:4px solid rgb(74,222,128)">Lunes</td>
+            <td style="color:rgb(74,222,128);font-weight:700">35</td>
+            <td style="color:rgb(74,222,128);font-weight:700">92%</td>
+            <td style="color:rgb(74,222,128);font-weight:700">$0.18</td>
+          </tr>
+          <tr>
+            <td style="border-left:4px solid rgb(115,184,113)">Martes</td>
+            <td style="color:rgb(115,184,113);font-weight:700">38</td>
+            <td style="color:rgb(115,184,113);font-weight:700">91%</td>
+            <td style="color:rgb(115,184,113);font-weight:700">$0.19</td>
+          </tr>
+          <tr>
+            <td style="border-left:4px solid rgb(157,145,98)">Miércoles</td>
+            <td style="color:rgb(157,145,98);font-weight:700">42</td>
+            <td style="color:rgb(157,145,98);font-weight:700">89%</td>
+            <td style="color:rgb(157,145,98);font-weight:700">$0.20</td>
+          </tr>
+          <tr>
+            <td style="border-left:4px solid rgb(198,107,83)">Jueves</td>
+            <td style="color:rgb(198,107,83);font-weight:700">47</td>
+            <td style="color:rgb(198,107,83);font-weight:700">87%</td>
+            <td style="color:rgb(198,107,83);font-weight:700">$0.22</td>
+          </tr>
+          <tr>
+            <td style="border-left:4px solid rgb(239,68,68)">Viernes</td>
+            <td style="color:rgb(239,68,68);font-weight:700">52</td>
+            <td style="color:rgb(239,68,68);font-weight:700">85%</td>
+            <td style="color:rgb(239,68,68);font-weight:700">$0.24</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Gráfico de tendencias</h3>
+    <div class="diagram-box">
+      <svg viewBox="0 0 820 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Gráfico de tendencias semanales de latencia, tasa de éxito y costo por tarea">
+        <!-- axes -->
+        <line x1="60" y1="20" x2="60" y2="230" stroke="#2a2a3e" stroke-width="1.5"/>
+        <line x1="40" y1="230" x2="780" y2="230" stroke="#2a2a3e" stroke-width="1.5"/>
+        <text x="52" y="34" text-anchor="end" fill="#6f6f8f" font-family="Inter,sans-serif" font-size="10">Alto</text>
+        <text x="52" y="234" text-anchor="end" fill="#6f6f8f" font-family="Inter,sans-serif" font-size="10">Bajo</text>
+
+        <!-- day labels -->
+        <text x="60" y="252" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="11">Lun</text>
+        <text x="235" y="252" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="11">Mar</text>
+        <text x="410" y="252" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="11">Mié</text>
+        <text x="585" y="252" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="11">Jue</text>
+        <text x="760" y="252" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="11">Vie</text>
+
+        <!-- Latencia line (purple) -->
+        <polyline points="60,230 235,194.7 410,147.6 585,88.8 760,30" fill="none" stroke="#7F77DD" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="60" cy="230" r="4" fill="#7F77DD"/>
+        <circle cx="235" cy="194.7" r="4" fill="#7F77DD"/>
+        <circle cx="410" cy="147.6" r="4" fill="#7F77DD"/>
+        <circle cx="585" cy="88.8" r="4" fill="#7F77DD"/>
+        <circle cx="760" cy="30" r="4" fill="#7F77DD"/>
+
+        <!-- Tasa de Éxito line (teal) -->
+        <polyline points="60,30 235,58.6 410,115.7 585,172.9 760,230" fill="none" stroke="#3d9e8c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="60" cy="30" r="4" fill="#3d9e8c"/>
+        <circle cx="235" cy="58.6" r="4" fill="#3d9e8c"/>
+        <circle cx="410" cy="115.7" r="4" fill="#3d9e8c"/>
+        <circle cx="585" cy="172.9" r="4" fill="#3d9e8c"/>
+        <circle cx="760" cy="230" r="4" fill="#3d9e8c"/>
+
+        <!-- Costo line (amber) -->
+        <polyline points="60,230 235,196.7 410,163.3 585,96.7 760,30" fill="none" stroke="#e0a458" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 0"/>
+        <circle cx="60" cy="230" r="4" fill="#e0a458"/>
+        <circle cx="235" cy="196.7" r="4" fill="#e0a458"/>
+        <circle cx="410" cy="163.3" r="4" fill="#e0a458"/>
+        <circle cx="585" cy="96.7" r="4" fill="#e0a458"/>
+        <circle cx="760" cy="30" r="4" fill="#e0a458"/>
+
+        <!-- legend -->
+        <g transform="translate(60,275)">
+          <rect x="0" y="0" width="12" height="12" rx="3" fill="#7F77DD"/>
+          <text x="18" y="10" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="11">Latencia</text>
+
+          <rect x="120" y="0" width="12" height="12" rx="3" fill="#3d9e8c"/>
+          <text x="138" y="10" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="11">Tasa de Éxito</text>
+
+          <rect x="280" y="0" width="12" height="12" rx="3" fill="#e0a458"/>
+          <text x="298" y="10" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="11">Costo por Tarea</text>
+        </g>
+
+        <text x="60" y="308" fill="#6f6f8f" font-family="Inter,sans-serif" font-size="10">Valores normalizados (0–100%) sobre el rango propio de cada métrica, para poder compararlas en el mismo eje.</text>
+      </svg>
+    </div>
+
+    <h3>Análisis</h3>
+
+    <div class="qa-card">
+      <div class="q"><span class="qnum">1.</span>¿Qué tendencias observás en la latencia?</div>
+      <p>La latencia aumenta de forma constante durante la semana: de 35 segundos el lunes a 52 el viernes, un incremento del 49%. Esta progresión lineal sugiere acumulación de carga o degradación gradual del sistema — no es un pico puntual sino una tendencia sostenida que requiere atención.</p>
+    </div>
+
+    <div class="qa-card">
+      <div class="q"><span class="qnum">2.</span>¿Qué tendencias observás en la tasa de éxito?</div>
+      <p>Cae de 92% a 85% a lo largo de la semana, una reducción de 7 puntos porcentuales. Si bien 85% puede parecer aceptable, la dirección descendente es la señal de alarma: si la tendencia continúa, el fin de semana siguiente podría estar en 78%.</p>
+    </div>
+
+    <div class="qa-card">
+      <div class="q"><span class="qnum">3.</span>¿Cómo evoluciona el costo por tarea y qué implicancias tiene?</div>
+      <p>El costo crece un 33% en la semana (de $0.18 a $0.24). Proyectado a escala: si el agente procesa 10.000 tareas mensuales y el costo sigue subiendo, la diferencia puede ser de miles de dólares. La escalabilidad del sistema se ve directamente amenazada.</p>
+    </div>
+
+    <div class="qa-card">
+      <div class="q"><span class="qnum">4.</span>¿Existe relación entre latencia y tasa de éxito?</div>
+      <p>Sí, existe una correlación inversa clara: a mayor latencia, menor tasa de éxito. Esto sugiere que cuando el agente tarda más en procesar (posiblemente por mayor complejidad de tareas, cuellos de botella en integraciones externas o saturación de recursos), comete más errores. La lentitud no es solo un problema de velocidad — afecta la calidad del output.</p>
+    </div>
+
+    <div class="qa-card">
+      <div class="q"><span class="qnum">5.</span>Dos acciones concretas para mejorar el rendimiento</div>
+      <div class="action-grid">
+        <div class="action-card">
+          <div class="action-title">Acción 1 — Caché de resultados frecuentes</div>
+          <p>Las tareas repetitivas no deberían procesarse desde cero cada vez. Un sistema de caché reduce latencia y costo en tareas similares.</p>
+          <div class="impact"><b>Impacto esperado:</b> reducción de latencia del 20–30%.</div>
+        </div>
+        <div class="action-card">
+          <div class="action-title">Acción 2 — Umbral de escalamiento automático</div>
+          <p>Cuando la latencia supere los 45s o la tasa de éxito caiga bajo 88%, el sistema deriva automáticamente al operador humano en lugar de seguir procesando y acumulando errores.</p>
+          <div class="impact"><b>Impacto esperado:</b> estabilización de la tasa de éxito sobre el 90%.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="q"><span class="qnum">6.</span>¿Qué KPI es más crítico en este escenario?</div>
+      <p>La tasa de éxito es el KPI más crítico. La latencia y el costo son problemas de eficiencia y dinero — recuperables. Una tasa de éxito baja significa tareas mal ejecutadas que llegan al cliente o requieren reprocesamiento humano, lo que genera un costo oculto mucho mayor que el operativo directo. Un agente rápido y barato que falla en 1 de cada 5 tareas no es un agente confiable.</p>
+    </div>
+  </section>
+
+  <!-- SECCIÓN 3 -->
+  <section id="flujo" class="fade-in">
+    <div class="kicker">Sección 3</div>
+    <h2>Diseño de Flujo Híbrido</h2>
+    <p class="intro">Un flujo híbrido combina la velocidad del agente para tareas repetitivas con el criterio humano para casos excepcionales. Los puntos de intervención son deliberados, no accidentales.</p>
+
+    <div class="diagram-box">
+      <svg viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama de flujo híbrido agente-humano">
+        <defs>
+          <marker id="arrow2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L0,6 L9,3 z" fill="#7F77DD"/>
+          </marker>
+        </defs>
+
+        <!-- ENTRADA -->
+        <rect x="320" y="10" width="260" height="50" rx="10" fill="#20203a" stroke="#7F77DD" stroke-width="1.5"/>
+        <text x="450" y="31" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="13" font-weight="700">ENTRADA</text>
+        <text x="450" y="48" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="10.5">Nueva tarea ingresa al sistema</text>
+
+        <line x1="450" y1="60" x2="450" y2="93" stroke="#7F77DD" stroke-width="1.5" marker-end="url(#arrow2)"/>
+
+        <!-- CLASIFICADOR diamond -->
+        <polygon points="450,95 620,140 450,185 280,140" fill="#7F77DD" fill-opacity="0.15" stroke="#7F77DD" stroke-width="1.5"/>
+        <text x="450" y="134" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="12.5" font-weight="700">CLASIFICADOR</text>
+        <text x="450" y="150" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="10">¿Estándar o excepcional?</text>
+
+        <!-- branch left to AGENTE -->
+        <line x1="345" y1="163" x2="195" y2="205" stroke="#3d9e8c" stroke-width="1.5" marker-end="url(#arrow2)"/>
+        <text x="230" y="188" text-anchor="middle" fill="#6f6f8f" font-family="Inter,sans-serif" font-size="10">[estándar]</text>
+
+        <!-- branch right to HUMANO interviene -->
+        <line x1="555" y1="163" x2="705" y2="205" stroke="#e0a458" stroke-width="1.5" marker-end="url(#arrow2)"/>
+        <text x="675" y="188" text-anchor="middle" fill="#6f6f8f" font-family="Inter,sans-serif" font-size="10">[excepcional]</text>
+
+        <!-- AGENTE procesa -->
+        <rect x="70" y="207" width="200" height="56" rx="10" fill="#1a1a2e" stroke="#3d9e8c" stroke-width="1.5"/>
+        <text x="170" y="230" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="12.5" font-weight="700">AGENTE</text>
+        <text x="170" y="247" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="10.5">procesa la tarea</text>
+
+        <!-- HUMANO interviene -->
+        <rect x="630" y="207" width="200" height="56" rx="10" fill="#1a1a2e" stroke="#e0a458" stroke-width="1.5" stroke-dasharray="6 4"/>
+        <text x="730" y="230" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="12.5" font-weight="700">HUMANO</text>
+        <text x="730" y="247" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="10.5">interviene</text>
+
+        <line x1="170" y1="263" x2="170" y2="298" stroke="#3d9e8c" stroke-width="1.5" marker-end="url(#arrow2)"/>
+        <line x1="730" y1="263" x2="730" y2="298" stroke="#e0a458" stroke-width="1.5" marker-end="url(#arrow2)"/>
+
+        <!-- Decision diamond ¿Resultado dentro de parámetros? -->
+        <polygon points="170,300 320,350 170,400 20,350" fill="#3d9e8c" fill-opacity="0.15" stroke="#3d9e8c" stroke-width="1.5"/>
+        <text x="170" y="343" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="11.5" font-weight="700">¿Resultado dentro</text>
+        <text x="170" y="359" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="11.5" font-weight="700">de parámetros?</text>
+
+        <!-- Resuelve y documenta -->
+        <rect x="600" y="300" width="260" height="76" rx="10" fill="#1a1a2e" stroke="#e0a458" stroke-width="1.5" stroke-dasharray="6 4"/>
+        <text x="730" y="325" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="12" font-weight="700">Resuelve y documenta</text>
+        <text x="730" y="342" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="10.5">el caso para entrenar</text>
+        <text x="730" y="358" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="10.5">al agente</text>
+
+        <!-- sí -> ENTREGA -->
+        <line x1="170" y1="400" x2="170" y2="443" stroke="#3d9e8c" stroke-width="1.5" marker-end="url(#arrow2)"/>
+        <text x="182" y="422" fill="#6f6f8f" font-family="Inter,sans-serif" font-size="10">[sí]</text>
+
+        <!-- no -> ESCALAMIENTO HUMANO -->
+        <line x1="255" y1="380" x2="410" y2="443" stroke="#e0a458" stroke-width="1.5" marker-end="url(#arrow2)"/>
+        <text x="330" y="405" fill="#6f6f8f" font-family="Inter,sans-serif" font-size="10">[no]</text>
+
+        <!-- feedback -->
+        <line x1="730" y1="376" x2="730" y2="443" stroke="#7F77DD" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrow2)"/>
+
+        <!-- ENTREGA -->
+        <rect x="70" y="445" width="200" height="50" rx="10" fill="#20203a" stroke="#3d9e8c" stroke-width="1.5"/>
+        <text x="170" y="466" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="12.5" font-weight="700">ENTREGA</text>
+        <text x="170" y="482" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="10">resultado al PM</text>
+
+        <!-- ESCALAMIENTO HUMANO -->
+        <rect x="330" y="445" width="220" height="50" rx="10" fill="#20203a" stroke="#e0a458" stroke-width="1.5"/>
+        <text x="440" y="466" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="12.5" font-weight="700">ESCALAMIENTO</text>
+        <text x="440" y="482" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="10">HUMANO</text>
+
+        <!-- FEEDBACK -->
+        <rect x="620" y="445" width="220" height="50" rx="10" fill="#20203a" stroke="#7F77DD" stroke-width="1.5" stroke-dasharray="6 4"/>
+        <text x="730" y="466" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="12.5" font-weight="700">FEEDBACK</text>
+        <text x="730" y="482" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="10">mejora al agente</text>
+
+        <!-- legend -->
+        <g transform="translate(70,530)">
+          <rect x="0" y="0" width="14" height="14" rx="3" fill="#1a1a2e" stroke="#3d9e8c" stroke-width="1.5"/>
+          <text x="20" y="11" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="11">Proceso automatizado</text>
+
+          <polygon points="270,7 285,0 300,7 285,14" fill="#7F77DD" fill-opacity="0.3" stroke="#7F77DD"/>
+          <text x="308" y="11" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="11">Punto de decisión</text>
+
+          <rect x="470" y="0" width="14" height="14" rx="3" fill="#1a1a2e" stroke="#e0a458" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <text x="490" y="11" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="11">Intervención humana</text>
+        </g>
+      </svg>
+    </div>
+
+    <h3>Puntos de intervención</h3>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>Punto</th><th>Condición</th><th>Quién actúa</th><th>Justificación</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Clasificación inicial</td><td>Tarea fuera de patrón conocido</td><td>Humano</td><td>El agente no tiene contexto suficiente para casos nuevos</td></tr>
+          <tr><td>Resultado fuera de rango</td><td>Latencia &gt;50s o confianza &lt;80%</td><td>Humano</td><td>El agente detecta su propia incertidumbre y escala</td></tr>
+          <tr><td>Validación final (alto impacto)</td><td>Tareas que afectan producción o datos reales</td><td>Humano</td><td>Decisiones irreversibles siempre requieren criterio humano</td></tr>
+          <tr><td>Fallo del agente</td><td>Error técnico o timeout</td><td>Humano</td><td>Fallback garantizado para continuidad operativa</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Reflexión final — conectando con Delivery Hub</h3>
+    <div class="reflection-card">
+      <p>En el contexto de Delivery Hub, estas métricas tienen impacto directo. El Agente Implementador debe tener una latencia &lt;2 minutos (benchmark propio del proyecto) y una tasa de éxito &gt;85% en checklists útiles para el PM. El costo por tarea en Claude API es estimado en &lt;$0.01 USD — muy por debajo del costo de 30 minutos de trabajo manual del PM analizando el mismo ticket. El flujo híbrido ya está diseñado: el agente genera, el PM aprueba. Ninguna acción se ejecuta sin confirmación humana.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-title">Juan Pablo Camaño</div>
+    <div class="foot-author">IA Agents — CoderHouse</div>
+    <div class="foot-tag">Pre-entrega Clase 4 · IA Agents · CoderHouse · 2026</div>
+  </div>
+</footer>
+
+<script>
+  var fadeEls = document.querySelectorAll('.fade-in');
+  var observer = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  fadeEls.forEach(function(el){ observer.observe(el); });
+</script>
+
+</body>
+</html>
