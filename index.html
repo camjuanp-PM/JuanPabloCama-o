@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delivery Hub · Blueprint Arquitectónico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f0f1a;
+    --card:#1a1a2e;
+    --card-alt:#20203a;
+    --border:#2a2a45;
+    --purple:#7F77DD;
+    --purple-soft:rgba(127,119,221,0.12);
+    --teal:#3d9e8c;
+    --teal-soft:rgba(61,158,140,0.12);
+    --text:#e8e8f2;
+    --text-dim:#a3a3bf;
+    --text-faint:#6f6f8f;
+    --radius:14px;
+    --maxw:860px;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+
+  html{scroll-behavior:smooth;}
+
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    min-width:320px;
+  }
+
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(127,119,221,0.10), transparent 45%),
+      radial-gradient(circle at 85% 30%, rgba(61,158,140,0.08), transparent 45%);
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .wrap{
+    max-width:var(--maxw);
+    margin:0 auto;
+    padding:0 20px;
+    position:relative;
+    z-index:1;
+  }
+
+  /* ---------- NAV ---------- */
+  nav.topnav{
+    position:sticky;
+    top:0;
+    z-index:100;
+    background:rgba(15,15,26,0.85);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border);
+  }
+
+  nav.topnav .navwrap{
+    max-width:var(--maxw);
+    margin:0 auto;
+    padding:0 20px;
+    display:flex;
+    gap:4px;
+    overflow-x:auto;
+    scrollbar-width:thin;
+    white-space:nowrap;
+  }
+
+  nav.topnav .navwrap::-webkit-scrollbar{height:4px;}
+  nav.topnav .navwrap::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+
+  nav.topnav a{
+    color:var(--text-dim);
+    text-decoration:none;
+    font-size:0.78rem;
+    font-weight:500;
+    padding:14px 10px;
+    display:inline-block;
+    border-bottom:2px solid transparent;
+    transition:color .2s, border-color .2s;
+    flex-shrink:0;
+  }
+
+  nav.topnav a:hover{color:var(--text);}
+  nav.topnav a.active{color:var(--purple);border-bottom-color:var(--purple);}
+
+  /* ---------- HEADER ---------- */
+  header.hero{
+    padding:72px 0 56px;
+    text-align:center;
+    position:relative;
+    z-index:1;
+  }
+
+  .badge{
+    display:inline-block;
+    font-size:0.72rem;
+    font-weight:600;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    color:var(--teal);
+    background:var(--teal-soft);
+    border:1px solid rgba(61,158,140,0.3);
+    padding:6px 14px;
+    border-radius:999px;
+    margin-bottom:22px;
+  }
+
+  header.hero h1{
+    font-size:2.4rem;
+    font-weight:800;
+    letter-spacing:-0.02em;
+    background:linear-gradient(135deg,#fff 30%,var(--purple) 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    margin-bottom:14px;
+  }
+
+  header.hero .subtitle{
+    font-size:1.1rem;
+    color:var(--text-dim);
+    font-weight:500;
+    margin-bottom:26px;
+  }
+
+  header.hero .author{
+    font-size:0.9rem;
+    color:var(--text-faint);
+  }
+
+  header.hero .author strong{
+    color:var(--text);
+    font-weight:600;
+  }
+
+  /* ---------- SECTIONS ---------- */
+  section{
+    padding:56px 0;
+    border-top:1px solid var(--border);
+  }
+
+  section .kicker{
+    font-size:0.78rem;
+    font-weight:700;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--purple);
+    margin-bottom:10px;
+  }
+
+  section h2{
+    font-size:1.6rem;
+    font-weight:700;
+    letter-spacing:-0.01em;
+    margin-bottom:22px;
+  }
+
+  section h3{
+    font-size:1.05rem;
+    font-weight:600;
+    margin:26px 0 12px;
+    color:var(--text);
+  }
+
+  p{
+    color:var(--text-dim);
+    margin-bottom:14px;
+    font-size:0.96rem;
+  }
+
+  p strong{color:var(--text);font-weight:600;}
+
+  .fade-in{
+    opacity:0;
+    transform:translateY(22px);
+    transition:opacity .7s ease, transform .7s ease;
+  }
+  .fade-in.visible{
+    opacity:1;
+    transform:translateY(0);
+  }
+
+  /* ---------- CARDS ---------- */
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:24px;
+    margin-bottom:18px;
+  }
+
+  .card-grid{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:18px;
+    margin-top:20px;
+  }
+
+  @media(min-width:700px){
+    .card-grid.cols-3{grid-template-columns:repeat(3,1fr);}
+  }
+
+  .ptc-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:22px;
+  }
+
+  .ptc-card .ptc-label{
+    font-size:0.7rem;
+    font-weight:700;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    margin-bottom:6px;
+  }
+
+  .ptc-card.persona .ptc-label{color:var(--purple);}
+  .ptc-card.tarea .ptc-label{color:var(--teal);}
+  .ptc-card.contexto .ptc-label{color:#e0a458;}
+
+  .ptc-card .ptc-title{
+    font-size:1.1rem;
+    font-weight:700;
+    margin-bottom:14px;
+  }
+
+  .ptc-card ul{
+    list-style:none;
+  }
+
+  .ptc-card li{
+    font-size:0.86rem;
+    color:var(--text-dim);
+    padding:8px 0;
+    border-top:1px solid var(--border);
+  }
+
+  .ptc-card li:first-of-type{border-top:none;}
+
+  .ptc-card li b{
+    color:var(--text);
+    font-weight:600;
+    display:block;
+    margin-bottom:2px;
+    font-size:0.78rem;
+    letter-spacing:0.02em;
+  }
+
+  /* ---------- TABLES ---------- */
+  .table-scroll{
+    overflow-x:auto;
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    -webkit-overflow-scrolling:touch;
+  }
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:0.84rem;
+    min-width:560px;
+  }
+
+  thead th{
+    background:var(--card-alt);
+    color:var(--purple);
+    text-align:left;
+    padding:12px 16px;
+    font-weight:600;
+    font-size:0.74rem;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    white-space:nowrap;
+  }
+
+  tbody td{
+    padding:12px 16px;
+    border-top:1px solid var(--border);
+    color:var(--text-dim);
+    vertical-align:top;
+  }
+
+  tbody tr:hover td{background:rgba(127,119,221,0.04);}
+
+  tbody td:first-child{color:var(--text);font-weight:500;}
+
+  /* ---------- WORKFLOW DIAGRAM ---------- */
+  .diagram-box{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:20px;
+    overflow-x:auto;
+  }
+
+  .diagram-box svg{display:block;margin:0 auto;min-width:560px;}
+
+  /* ---------- GUARDRAILS ---------- */
+  .guardrail-list{
+    list-style:none;
+    margin-top:8px;
+  }
+
+  .guardrail-list li{
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:14px 16px;
+    margin-bottom:10px;
+    font-size:0.9rem;
+    color:var(--text-dim);
+  }
+
+  .guardrail-list li .ico{
+    color:var(--teal);
+    font-weight:800;
+    flex-shrink:0;
+  }
+
+  .agent-guardrail{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-left:3px solid var(--purple);
+    border-radius:10px;
+    padding:14px 18px;
+    margin-bottom:10px;
+    font-size:0.9rem;
+    color:var(--text-dim);
+  }
+
+  .agent-guardrail b{color:var(--text);}
+
+  .fail-list, .log-list{
+    list-style:none;
+    margin-top:6px;
+  }
+
+  .fail-list li, .log-list li{
+    position:relative;
+    padding:8px 0 8px 20px;
+    font-size:0.88rem;
+    color:var(--text-dim);
+    border-top:1px solid var(--border);
+  }
+
+  .fail-list li:first-child, .log-list li:first-child{border-top:none;}
+
+  .fail-list li::before{
+    content:"⚠";
+    position:absolute;
+    left:0;
+    color:#e0a458;
+  }
+
+  .log-list li::before{
+    content:"▪";
+    position:absolute;
+    left:0;
+    color:var(--purple);
+  }
+
+  /* ---------- KPI CARDS ---------- */
+  .kpi-grid{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:16px;
+    margin-top:20px;
+  }
+
+  @media(min-width:700px){
+    .kpi-grid{grid-template-columns:repeat(2,1fr);}
+  }
+
+  .kpi-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:22px;
+  }
+
+  .kpi-card .kpi-agent{
+    font-size:0.72rem;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    color:var(--teal);
+    margin-bottom:10px;
+  }
+
+  .kpi-card .kpi-number{
+    font-size:2.1rem;
+    font-weight:800;
+    color:var(--purple);
+    line-height:1;
+    margin-bottom:8px;
+  }
+
+  .kpi-card .kpi-desc{
+    font-size:0.84rem;
+    color:var(--text-dim);
+    margin-bottom:10px;
+  }
+
+  .kpi-card .kpi-meta{
+    font-size:0.78rem;
+    color:var(--text-faint);
+    border-top:1px solid var(--border);
+    padding-top:10px;
+  }
+
+  .kpi-meta span{display:block;margin-bottom:3px;}
+
+  .extra-metrics{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:14px;
+    margin-top:20px;
+  }
+
+  @media(min-width:700px){
+    .extra-metrics{grid-template-columns:repeat(3,1fr);}
+  }
+
+  .extra-metrics .em{
+    background:var(--card-alt);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:16px;
+    text-align:center;
+  }
+
+  .extra-metrics .em .val{
+    font-size:1.3rem;
+    font-weight:700;
+    color:var(--teal);
+    margin-bottom:4px;
+  }
+
+  .extra-metrics .em .lbl{
+    font-size:0.76rem;
+    color:var(--text-faint);
+  }
+
+  /* ---------- ROADMAP ---------- */
+  .roadmap{
+    position:relative;
+    margin-top:24px;
+    padding-left:28px;
+  }
+
+  .roadmap::before{
+    content:"";
+    position:absolute;
+    left:7px;
+    top:6px;
+    bottom:6px;
+    width:2px;
+    background:linear-gradient(var(--purple),var(--teal));
+  }
+
+  .phase{
+    position:relative;
+    padding-bottom:28px;
+  }
+
+  .phase:last-child{padding-bottom:0;}
+
+  .phase::before{
+    content:"";
+    position:absolute;
+    left:-28px;
+    top:4px;
+    width:16px;
+    height:16px;
+    border-radius:50%;
+    background:var(--bg);
+    border:3px solid var(--purple);
+  }
+
+  .phase.done::before{
+    background:var(--teal);
+    border-color:var(--teal);
+  }
+
+  .phase .phase-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:20px;
+  }
+
+  .phase-header{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:10px;
+    margin-bottom:10px;
+  }
+
+  .phase-header h3{
+    margin:0;
+    font-size:1rem;
+  }
+
+  .phase-status{
+    font-size:0.68rem;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    padding:3px 10px;
+    border-radius:999px;
+  }
+
+  .phase-status.completado{
+    background:var(--teal-soft);
+    color:var(--teal);
+    border:1px solid rgba(61,158,140,0.3);
+  }
+
+  .phase-status.proximo{
+    background:var(--purple-soft);
+    color:var(--purple);
+    border:1px solid rgba(127,119,221,0.3);
+  }
+
+  .phase-status.pending{
+    background:rgba(163,163,191,0.08);
+    color:var(--text-faint);
+    border:1px solid var(--border);
+  }
+
+  .phase-card p{margin-bottom:8px;}
+
+  .risk-block{
+    margin-top:12px;
+    padding-top:12px;
+    border-top:1px dashed var(--border);
+    font-size:0.84rem;
+  }
+
+  .risk-block div{margin-bottom:4px;color:var(--text-dim);}
+  .risk-block b{color:var(--text);font-weight:600;}
+
+  .resp-tag{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size:0.78rem;
+    color:var(--text-dim);
+    margin-top:2px;
+  }
+
+  .resp-tag .resp-label{
+    font-weight:700;
+    text-transform:uppercase;
+    font-size:0.66rem;
+    letter-spacing:0.05em;
+    color:var(--purple);
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    border-top:1px solid var(--border);
+    padding:48px 0 60px;
+    text-align:center;
+  }
+
+  footer .foot-title{
+    font-weight:700;
+    font-size:1.05rem;
+    margin-bottom:4px;
+  }
+
+  footer .foot-author{
+    color:var(--text-dim);
+    font-size:0.88rem;
+    margin-bottom:14px;
+  }
+
+  footer .foot-tag{
+    color:var(--text-faint);
+    font-size:0.8rem;
+    margin-bottom:18px;
+  }
+
+  @media(max-width:480px){
+    header.hero h1{font-size:1.7rem;}
+    header.hero .subtitle{font-size:0.95rem;}
+    section h2{font-size:1.3rem;}
+    .kpi-card .kpi-number{font-size:1.7rem;}
+  }
+</style>
+</head>
+<body>
+
+<nav class="topnav" id="topnav">
+  <div class="navwrap">
+    <a href="#estrategia" data-nav>1. Estrategia</a>
+    <a href="#ptc" data-nav>2. Persona-Tarea-Contexto</a>
+    <a href="#workflow" data-nav>3. Workflow</a>
+    <a href="#tecnologia" data-nav>4. Tecnología</a>
+    <a href="#guardrails" data-nav>5. Guardrails</a>
+    <a href="#kpis" data-nav>6. KPIs</a>
+    <a href="#roadmap" data-nav>7. Roadmap</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="badge">TP Final · IA Agents · CoderHouse</span>
+    <h1>Delivery Hub · Blueprint Arquitectónico</h1>
+    <p class="subtitle">Célula Híbrida de PM Agéntico para eCommerce</p>
+    <p class="author">Por <strong>Juan Pablo Camaño</strong></p>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- 1. DEFINICIÓN ESTRATÉGICA -->
+  <section id="estrategia" class="fade-in">
+    <div class="kicker">Sección 1</div>
+    <h2>Definición Estratégica del Caso</h2>
+
+    <h3>Proceso elegido</h3>
+    <p>Gestión end-to-end del desarrollo evolutivo de sitios eCommerce (desde apertura de ticket hasta publicación y medición de impacto).</p>
+
+    <h3>Problema actual</h3>
+    <p>Los flujos están fragmentados — <strong>Desarrollo</strong> vive en Jira, <strong>Contenido</strong> trabaja por fuera, <strong>Analytics</strong> mide después, <strong>Documentación</strong> no ocurre. No hay visibilidad unificada del end-to-end ni asistencia inteligente para las decisiones del PM.</p>
+
+    <h3>Objetivo</h3>
+    <p>Una app (<strong>Delivery Hub</strong>) que sea la interfaz de una célula híbrida de agentes. No solo muestra datos — ayuda a decidir y actuar.</p>
+
+    <h3>Justificación del enfoque híbrido</h3>
+    <p>Las decisiones de priorización, aprobación de deploys y validaciones de diseño requieren criterio humano irremplazable. El agente absorbe la complejidad operativa repetitiva; el humano se concentra en decisiones de alto impacto.</p>
+  </section>
+
+  <!-- 2. PERSONA - TAREA - CONTEXTO -->
+  <section id="ptc" class="fade-in">
+    <div class="kicker">Sección 2</div>
+    <h2>Marco Persona – Tarea – Contexto</h2>
+
+    <div class="card-grid cols-3">
+      <div class="ptc-card persona">
+        <div class="ptc-label">Persona</div>
+        <div class="ptc-title">Agente Orquestador</div>
+        <ul>
+          <li><b>Rol</b>Asistente de PM para eCommerce integrado en Delivery Hub</li>
+          <li><b>Capacidades</b>Lectura de Jira, análisis de sprints, generación de checklists, documentación automática, análisis de performance</li>
+          <li><b>Límites</b>Solo lectura en Jira. Sin deploys. Sin publicación sin aprobación humana. Aislado por marcaId.</li>
+          <li><b>Autonomía</b>Media — actúa dentro de flujos definidos, escala en decisiones de alto impacto</li>
+        </ul>
+      </div>
+
+      <div class="ptc-card tarea">
+        <div class="ptc-label">Tarea</div>
+        <div class="ptc-title">Actividades del sistema agéntico</div>
+        <ul>
+          <li>Analizar estado del sprint y detectar riesgos proactivamente</li>
+          <li>Generar checklist de implementación dado un ticket de Jira</li>
+          <li>Documentar sprints y proyectos al cierre</li>
+          <li>Analizar métricas de performance con contexto de negocio</li>
+          <li>Subtareas estructuradas por cada agente especializado</li>
+          <li><b>Complejidad</b>Alta (flujos paralelos, múltiples sistemas)</li>
+        </ul>
+      </div>
+
+      <div class="ptc-card contexto">
+        <div class="ptc-label">Contexto</div>
+        <div class="ptc-title">Entorno operativo</div>
+        <ul>
+          <li><b>Sistemas</b>Jira REST API v3, Google Sheets, Google Drive, Confluence, Lighthouse, CrUX</li>
+          <li><b>Plataforma eCommerce</b>VTEX IO</li>
+          <li><b>Restricciones</b>Sin escritura en Jira sin confirmación humana. Aislamiento de datos por marca. Fallback disponible si IA falla.</li>
+          <li><b>Riesgos</b>Contenido publicado sin validar, tickets mal priorizados, métricas mal interpretadas</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. AGENTIC WORKFLOW -->
+  <section id="workflow" class="fade-in">
+    <div class="kicker">Sección 3</div>
+    <h2>Diseño del Agentic Workflow</h2>
+    <p>Flujo principal de decisión: el Orquestador detecta el contexto activo en Delivery Hub y despacha al agente especializado correspondiente. En todos los casos, el PM revisa y aprueba antes de cualquier acción.</p>
+
+    <div class="diagram-box">
+      <svg viewBox="0 0 900 660" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama del flujo agéntico de Delivery Hub">
+        <defs>
+          <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L0,6 L9,3 z" fill="#7F77DD"/>
+          </marker>
+        </defs>
+
+        <!-- PM abre Delivery Hub -->
+        <rect x="330" y="10" width="240" height="50" rx="10" fill="#20203a" stroke="#7F77DD" stroke-width="1.5"/>
+        <text x="450" y="40" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="14" font-weight="600">PM abre Delivery Hub</text>
+
+        <line x1="450" y1="60" x2="450" y2="95" stroke="#7F77DD" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+        <!-- Orquestador -->
+        <rect x="280" y="96" width="340" height="56" rx="10" fill="#7F77DD" fill-opacity="0.15" stroke="#7F77DD" stroke-width="1.5"/>
+        <text x="450" y="120" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="14" font-weight="700">Orquestador</text>
+        <text x="450" y="140" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="11">detecta contexto activo (vista + marca + elemento)</text>
+
+        <!-- branches down -->
+        <line x1="450" y1="152" x2="450" y2="172" stroke="#7F77DD" stroke-width="1.5"/>
+        <line x1="112" y1="172" x2="788" y2="172" stroke="#2a2a45" stroke-width="1.5"/>
+        <line x1="112" y1="172" x2="112" y2="196" stroke="#7F77DD" stroke-width="1.5" marker-end="url(#arrow)"/>
+        <line x1="337" y1="172" x2="337" y2="196" stroke="#7F77DD" stroke-width="1.5" marker-end="url(#arrow)"/>
+        <line x1="562" y1="172" x2="562" y2="196" stroke="#7F77DD" stroke-width="1.5" marker-end="url(#arrow)"/>
+        <line x1="788" y1="172" x2="788" y2="196" stroke="#7F77DD" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+        <!-- condition labels -->
+        <text x="112" y="188" text-anchor="middle" fill="#6f6f8f" font-family="Inter,sans-serif" font-size="10">[si Dashboard]</text>
+        <text x="337" y="188" text-anchor="middle" fill="#6f6f8f" font-family="Inter,sans-serif" font-size="10">[si Sprint+ticket]</text>
+        <text x="562" y="188" text-anchor="middle" fill="#6f6f8f" font-family="Inter,sans-serif" font-size="10">[si cierre sprint]</text>
+        <text x="788" y="188" text-anchor="middle" fill="#6f6f8f" font-family="Inter,sans-serif" font-size="10">[si Performance]</text>
+
+        <!-- 4 agent boxes -->
+        <g>
+          <rect x="12" y="198" width="200" height="66" rx="10" fill="#1a1a2e" stroke="#3d9e8c" stroke-width="1.5"/>
+          <text x="112" y="222" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="12.5" font-weight="700">PM Analyst</text>
+          <text x="112" y="240" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="10.5">analiza sprint</text>
+          <text x="112" y="254" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="10.5">genera alertas</text>
+        </g>
+
+        <g>
+          <rect x="237" y="198" width="200" height="66" rx="10" fill="#1a1a2e" stroke="#3d9e8c" stroke-width="1.5"/>
+          <text x="337" y="222" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="12.5" font-weight="700">Implementador</text>
+          <text x="337" y="240" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="10.5">genera checklist de</text>
+          <text x="337" y="254" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="10.5">implementación</text>
+        </g>
+
+        <g>
+          <rect x="462" y="198" width="200" height="66" rx="10" fill="#1a1a2e" stroke="#3d9e8c" stroke-width="1.5"/>
+          <text x="562" y="222" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="12.5" font-weight="700">Documentador</text>
+          <text x="562" y="240" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="10.5">genera borrador de</text>
+          <text x="562" y="254" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="10.5">documentación</text>
+        </g>
+
+        <g>
+          <rect x="688" y="198" width="200" height="66" rx="10" fill="#1a1a2e" stroke="#3d9e8c" stroke-width="1.5"/>
+          <text x="788" y="222" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="12.5" font-weight="700">Healthcheck</text>
+          <text x="788" y="240" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="10.5">genera</text>
+          <text x="788" y="254" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="10.5">recomendaciones</text>
+        </g>
+
+        <!-- converge down -->
+        <line x1="112" y1="264" x2="112" y2="300" stroke="#7F77DD" stroke-width="1.5"/>
+        <line x1="337" y1="264" x2="337" y2="300" stroke="#7F77DD" stroke-width="1.5"/>
+        <line x1="562" y1="264" x2="562" y2="300" stroke="#7F77DD" stroke-width="1.5"/>
+        <line x1="788" y1="264" x2="788" y2="300" stroke="#7F77DD" stroke-width="1.5"/>
+        <line x1="112" y1="300" x2="788" y2="300" stroke="#2a2a45" stroke-width="1.5"/>
+        <line x1="450" y1="300" x2="450" y2="322" stroke="#7F77DD" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+        <!-- Human review gate -->
+        <rect x="250" y="324" width="400" height="60" rx="10" fill="#3d9e8c" fill-opacity="0.15" stroke="#3d9e8c" stroke-width="1.5" stroke-dasharray="6 4"/>
+        <text x="450" y="350" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="13.5" font-weight="700">En todos los casos: PM revisa</text>
+        <text x="450" y="368" text-anchor="middle" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="11.5">y aprueba antes de cualquier acción</text>
+
+        <line x1="450" y1="384" x2="450" y2="418" stroke="#3d9e8c" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+        <!-- Action executed -->
+        <rect x="300" y="420" width="300" height="50" rx="10" fill="#20203a" stroke="#3d9e8c" stroke-width="1.5"/>
+        <text x="450" y="450" text-anchor="middle" fill="#e8e8f2" font-family="Inter,sans-serif" font-size="13" font-weight="600">Acción ejecutada / publicada</text>
+
+        <!-- legend -->
+        <g transform="translate(0,500)">
+          <rect x="12" y="0" width="14" height="14" rx="3" fill="#7F77DD" fill-opacity="0.3" stroke="#7F77DD"/>
+          <text x="32" y="11" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="11">Nodo del Orquestador</text>
+
+          <rect x="230" y="0" width="14" height="14" rx="3" fill="#1a1a2e" stroke="#3d9e8c"/>
+          <text x="250" y="11" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="11">Agente especializado</text>
+
+          <rect x="460" y="0" width="14" height="14" rx="3" fill="#3d9e8c" fill-opacity="0.3" stroke="#3d9e8c" stroke-dasharray="4 3"/>
+          <text x="480" y="11" fill="#a3a3bf" font-family="Inter,sans-serif" font-size="11">Gate de aprobación humana</text>
+        </g>
+
+        <text x="12" y="540" fill="#6f6f8f" font-family="Inter,sans-serif" font-size="10.5">
+          Célula híbrida: cada rama de agente converge siempre en revisión humana antes de ejecutar.
+        </text>
+      </svg>
+    </div>
+
+    <h3>Tabla de flujo híbrido</h3>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>Etapa</th><th>Agente</th><th>Humano (PM)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Detección de riesgo en sprint</td><td>PM Analyst genera alerta</td><td>PM decide si escala</td></tr>
+          <tr><td>Análisis de ticket</td><td>Implementador genera checklist</td><td>PM valida</td></tr>
+          <tr><td>Creación de foco</td><td>Agente pre-completa</td><td>PM confirma y publica</td></tr>
+          <tr><td>Cierre de sprint</td><td>Documentador genera borrador</td><td>PM aprueba</td></tr>
+          <tr><td>Performance</td><td>Healthcheck prioriza</td><td>Equipo técnico implementa</td></tr>
+          <tr><td>Apertura ticket Jira</td><td>Agente pre-completa campos</td><td>PM confirma</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 4. SELECCIÓN TECNOLÓGICA -->
+  <section id="tecnologia" class="fade-in">
+    <div class="kicker">Sección 4</div>
+    <h2>Selección y Justificación Tecnológica</h2>
+
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>Capa</th><th>Tecnología</th><th>Función</th><th>Por qué esta y no otra</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Frontend</td><td>HTML+CSS+JS vanilla</td><td>Shell de la app</td><td>Sin overhead, deployable como Apps Script Web App</td></tr>
+          <tr><td>Backend</td><td>Google Apps Script</td><td>Orquestación</td><td>Integrado con Google Workspace, sin infraestructura extra</td></tr>
+          <tr><td>Base de datos</td><td>Google Sheets</td><td>Contexto persistente</td><td>Accesible para el PM sin conocimientos técnicos</td></tr>
+          <tr><td>Integración</td><td>Jira REST API v3</td><td>Fuente de datos</td><td>API oficial, lectura en tiempo real del board</td></tr>
+          <tr><td>Motor IA</td><td>Claude API (claude-sonnet-4-6)</td><td>Razonamiento</td><td>Capacidad de análisis contextual superior, instrucciones en lenguaje natural, mejor para tareas de PM</td></tr>
+          <tr><td>Documentación</td><td>Confluence + Drive</td><td>Output del Documentador</td><td>Ya es el stack de documentación del equipo</td></tr>
+          <tr><td>Performance</td><td>Lighthouse + CrUX</td><td>Input del Healthcheck</td><td>Estándares de la industria para web performance</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Nota sobre Claude vs Codex vs OpenClaw</h3>
+    <div class="card">
+      <p><strong>Claude</strong> — elegido para razonamiento y análisis contextual (tareas de PM).</p>
+      <p><strong>Codex</strong> — más orientado a generación de código; no es el caso de uso.</p>
+      <p style="margin-bottom:0"><strong>OpenClaw</strong> — útil para automatizar interfaces sin API; no necesario porque todos los sistemas tienen API disponible.</p>
+    </div>
+  </section>
+
+  <!-- 5. GUARDRAILS -->
+  <section id="guardrails" class="fade-in">
+    <div class="kicker">Sección 5</div>
+    <h2>Guardrails y Control de Riesgo</h2>
+
+    <h3>Guardrails globales</h3>
+    <ul class="guardrail-list">
+      <li><span class="ico">✓</span><span>Ningún agente escribe en Jira sin confirmación humana explícita</span></li>
+      <li><span class="ico">✓</span><span>Ningún agente publica documentación sin aprobación del PM</span></li>
+      <li><span class="ico">✓</span><span>Aislamiento por marcaId — un agente no accede a datos de otra marca</span></li>
+      <li><span class="ico">✓</span><span>El agente siempre muestra su razonamiento antes de sugerir</span></li>
+      <li><span class="ico">✓</span><span>Fallback disponible — si la IA falla, la app funciona igual sin ella</span></li>
+    </ul>
+
+    <h3>Guardrails por agente</h3>
+    <div class="agent-guardrail"><b>PM Analyst:</b> No prioriza — sugiere. Escala si riesgo &gt; umbral.</div>
+    <div class="agent-guardrail"><b>Implementador:</b> Solo lectura en Jira. Arquitectura escala al Tech Lead.</div>
+    <div class="agent-guardrail"><b>Documentador:</b> Genera borrador — PM revisa y aprueba antes de publicar.</div>
+    <div class="agent-guardrail"><b>Healthcheck:</b> No ejecuta cambios. Recomendaciones son sugerencias.</div>
+
+    <h3>Escenarios de fallo</h3>
+    <ul class="fail-list">
+      <li>API de Jira no responde → mostrar datos del cache en Sheets</li>
+      <li>Claude API timeout → degradar a modo sin IA, notificar al PM</li>
+      <li>Agente genera sugerencia errónea → PM la descarta, se logea para mejora</li>
+    </ul>
+
+    <h3>Logging y auditoría</h3>
+    <ul class="log-list">
+      <li>Cada llamada al agente se registra con timestamp, input y output</li>
+      <li>Las sugerencias aceptadas vs rechazadas se trackean para mejorar prompts</li>
+      <li>El PM puede ver el historial de interacciones con el agente</li>
+    </ul>
+  </section>
+
+  <!-- 6. KPIS -->
+  <section id="kpis" class="fade-in">
+    <div class="kicker">Sección 6</div>
+    <h2>KPIs Operativos y Métricas</h2>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-agent">PM Analyst</div>
+        <div class="kpi-number">&gt;80%</div>
+        <div class="kpi-desc">% alertas accionadas</div>
+        <div class="kpi-meta">
+          <span><strong style="color:#e8e8f2">Baseline actual:</strong> 0% (manual hoy)</span>
+          <span><strong style="color:#e8e8f2">Acción si cae:</strong> Revisar umbrales de detección</span>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-agent">Implementador</div>
+        <div class="kpi-number">&lt;2 min</div>
+        <div class="kpi-desc">Tiempo de análisis de ticket</div>
+        <div class="kpi-meta">
+          <span><strong style="color:#e8e8f2">Baseline actual:</strong> ~30 min (manual)</span>
+          <span><strong style="color:#e8e8f2">Acción si cae:</strong> Optimizar prompt + contexto</span>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-agent">Documentador</div>
+        <div class="kpi-number">&gt;70%</div>
+        <div class="kpi-desc">Borradores aprobados sin edición mayor</div>
+        <div class="kpi-meta">
+          <span><strong style="color:#e8e8f2">Baseline actual:</strong> 0% (no existe hoy)</span>
+          <span><strong style="color:#e8e8f2">Acción si cae:</strong> Mejorar template de documentación</span>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-agent">Healthcheck</div>
+        <div class="kpi-number">&gt;50%</div>
+        <div class="kpi-desc">Recomendaciones implementadas en sprint</div>
+        <div class="kpi-meta">
+          <span><strong style="color:#e8e8f2">Baseline actual:</strong> ~20% (manual, sin priorización)</span>
+          <span><strong style="color:#e8e8f2">Acción si cae:</strong> Revisar criterios de priorización</span>
+        </div>
+      </div>
+    </div>
+
+    <h3>Métricas adicionales</h3>
+    <div class="extra-metrics">
+      <div class="em">
+        <div class="val">&lt;3s</div>
+        <div class="lbl">Latencia del agente por respuesta</div>
+      </div>
+      <div class="em">
+        <div class="val">&lt;$0.01</div>
+        <div class="lbl">Costo por tarea (Claude API)</div>
+      </div>
+      <div class="em">
+        <div class="val">40%</div>
+        <div class="lbl">Ratio de intervención humana objetivo (vs 100% hoy)</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. ROADMAP -->
+  <section id="roadmap" class="fade-in">
+    <div class="kicker">Sección 7</div>
+    <h2>Roadmap de Implementación</h2>
+
+    <div class="roadmap">
+
+      <div class="phase done">
+        <div class="phase-card">
+          <div class="phase-header">
+            <h3>Fase 1 — Diagnóstico</h3>
+            <span class="phase-status completado">Completado</span>
+          </div>
+          <p>Delivery Hub funcionando: Dashboard, Sprint, Roadmap, Subproyectos, Performance. Sync con Jira. Base de datos en Sheets.</p>
+          <div class="resp-tag"><span class="resp-label">Responsable</span> Juan Pablo Camaño (PM)</div>
+        </div>
+      </div>
+
+      <div class="phase done">
+        <div class="phase-card">
+          <div class="phase-header">
+            <h3>Fase 2 — Diseño</h3>
+            <span class="phase-status completado">Completado</span>
+          </div>
+          <p>Blueprint arquitectónico. PRDs por módulo. Definición de guardrails y KPIs. Este documento.</p>
+          <div class="resp-tag"><span class="resp-label">Responsable</span> Juan Pablo Camaño (PM)</div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-card">
+          <div class="phase-header">
+            <h3>Fase 3 — Desarrollo — Agente Implementador</h3>
+            <span class="phase-status proximo">Próximo</span>
+          </div>
+          <p>Chat contextual en vista Sprint. Al seleccionar un ticket, el PM puede consultar al agente cómo implementarlo.</p>
+          <div class="resp-tag"><span class="resp-label">Responsable</span> Juan Pablo Camaño (PM) + soporte de Tech Lead (integración técnica)</div>
+          <div class="risk-block">
+            <div><b>Riesgo:</b> integración de Claude API con Apps Script.</div>
+            <div><b>Mitigación:</b> PoC aislado antes de integrar al proyecto principal.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-card">
+          <div class="phase-header">
+            <h3>Fase 4 — Piloto — Agente PM Analyst</h3>
+            <span class="phase-status pending">Pendiente</span>
+          </div>
+          <p>Alertas automáticas en Dashboard. Focos generados por IA. Piloto en un sprint real de Nike ARG.</p>
+          <div class="resp-tag"><span class="resp-label">Responsable</span> Juan Pablo Camaño (PM) + equipo PM/PO de Nike ARG (piloto)</div>
+          <div class="risk-block">
+            <div><b>Riesgo:</b> falsas alarmas que generen ruido para el PM.</div>
+            <div><b>Mitigación:</b> umbral conservador en la primera versión.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-card">
+          <div class="phase-header">
+            <h3>Fase 5 — Despliegue controlado — Agente Documentador</h3>
+            <span class="phase-status pending">Pendiente</span>
+          </div>
+          <p>Generación automática de resúmenes de sprint. Integración con Confluence y Drive.</p>
+          <div class="resp-tag"><span class="resp-label">Responsable</span> Juan Pablo Camaño (PM) + equipo de Documentación (Confluence)</div>
+          <div class="risk-block">
+            <div><b>Riesgo:</b> adopción del PM si el borrador requiere mucha edición.</div>
+            <div><b>Mitigación:</b> iterar el template con feedback real.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-card">
+          <div class="phase-header">
+            <h3>Fase 6 — Monitoreo y optimización — Agente Healthcheck</h3>
+            <span class="phase-status pending">Pendiente</span>
+          </div>
+          <p>Performance con contexto de negocio. Correlación con deploys. Expansión a múltiples marcas/sitios.</p>
+          <div class="resp-tag"><span class="resp-label">Responsable</span> Juan Pablo Camaño (PM) + equipo técnico (deploys) + stakeholders del eCommerce</div>
+          <div class="risk-block">
+            <div><b>Estrategia de gestión del cambio:</b> capacitación al equipo, dashboard de métricas visible para todos los stakeholders.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-title">Delivery Hub — Célula Híbrida de PM Agéntico</div>
+    <div class="foot-author">Juan Pablo Camaño</div>
+    <div class="foot-tag">Entregado como TP Final · IA Agents · CoderHouse · 2026</div>
+  </div>
+</footer>
+
+<script>
+  // --- Fade-in on scroll ---
+  var fadeEls = document.querySelectorAll('.fade-in');
+  var observer = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  fadeEls.forEach(function(el){ observer.observe(el); });
+
+  // --- Active nav link on scroll ---
+  var navLinks = document.querySelectorAll('nav.topnav a[data-nav]');
+  var sections = Array.prototype.slice.call(document.querySelectorAll('main section[id]'));
+
+  function setActiveNav(){
+    var scrollPos = window.scrollY + 90;
+    var current = sections[0];
+    sections.forEach(function(sec){
+      if(sec.offsetTop <= scrollPos) current = sec;
+    });
+    navLinks.forEach(function(link){
+      link.classList.toggle('active', link.getAttribute('href') === '#' + current.id);
+    });
+  }
+
+  window.addEventListener('scroll', setActiveNav, { passive: true });
+  window.addEventListener('load', setActiveNav);
+
+  // --- Smooth scroll (fallback for older browsers, CSS already handles most) ---
+  navLinks.forEach(function(link){
+    link.addEventListener('click', function(e){
+      var target = document.querySelector(link.getAttribute('href'));
+      if(target){
+        e.preventDefault();
+        window.scrollTo({ top: target.offsetTop - 52, behavior: 'smooth' });
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
